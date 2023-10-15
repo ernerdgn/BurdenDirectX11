@@ -5,11 +5,16 @@ Game Engine Project ("Burden")
 *done*
 **todo**
 *1-game development*
+
 *2-engine requires*
+
 *3-initialization*
+
 *4-window creation*
+
 *5-swap chain*
-*6-device context*
+
+*6-device context*\n
 *7-drawing 2d shapes*
 *8-vertex shader*
 *9-pixel shader*
