@@ -11,7 +11,7 @@
 struct vertex
 {
 	Vector3D pos;
-	Vector3D pos1;
+	//Vector3D pos1;
 	Vector3D color;
 	Vector3D color1;
 };
@@ -41,13 +41,29 @@ void AppWindow::updateQuadPos()
 
 	Matrix4x4 temp;
 
-	m_delta_scale += m_delta_time / .15f;
+	m_delta_scale += m_delta_time / .5f;
 
 	//const_obj.m_world.setTranslationMatrix(Vector3D(0,0,0));
 	//const_obj.m_world.setTranslationMatrix(Vector3D::lerp(Vector3D(-2, -2, 0), Vector3D(2, 2, 0), m_delta_pos));
-	const_obj.m_world.setScaleMatrix(Vector3D::lerp(Vector3D(.5, .5, 0), Vector3D(1.0f, 1.0f, 0), (sin(m_delta_scale)+1.0f)/2.0f));
-	temp.setTranslationMatrix(Vector3D::lerp(Vector3D(-1.5f, -1.5f, 0), Vector3D(1.5f, 1.5f, 0), m_delta_pos));
+	//const_obj.m_world.setScaleMatrix(Vector3D::lerp(Vector3D(.5, .5, 0), Vector3D(1.0f, 1.0f, 0), (sin(m_delta_scale)+1.0f)/2.0f));
+	//temp.setTranslationMatrix(Vector3D::lerp(Vector3D(-1.5f, -1.5f, 0), Vector3D(1.5f, 1.5f, 0), m_delta_pos));
 	
+	//const_obj.m_world *= temp;
+	const_obj.m_world.setScaleMatrix(Vector3D(1, 1, 1));
+
+	//x-rotation
+	temp.setIdentityMatrix();
+	temp.setRotationXMatrix(m_delta_scale);
+	const_obj.m_world *= temp;
+
+	//y-rotation
+	temp.setIdentityMatrix();
+	temp.setRotationYMatrix(m_delta_scale);
+	const_obj.m_world *= temp;
+
+	//z-rotation
+	temp.setIdentityMatrix();
+	temp.setRotationZMatrix(m_delta_scale);
 	const_obj.m_world *= temp;
 
 	const_obj.m_view.setIdentityMatrix();
@@ -80,19 +96,68 @@ void AppWindow::onCreate()
 	//	{.5f, -.5f, .0f},  //pos3
 	//};
 
-	vertex list[] = {  //for triangle strip
-			//(vec3)pos_1,		(vec3)pos1_1,			(vec3)color_1			(vec3)color1_1
-			//(vec3)pos_2,		(vec3)pos1_2,			(vec3)color_2			(vec3)color1_2
-			//(vec3)pos_3,		(vec3)pos1_3,			(vec3)color_3			(vec3)color1_3
-			//(vec3)pos_4,		(vec3)pos1_4,			(vec3)color_4			(vec3)color1_4
-			{Vector3D(-.5f, -.5f, .0f),	Vector3D(-.32f, -.11f, .0f),	Vector3D(0, 0, 1),		Vector3D(1, 1, 0)},
-			{Vector3D(-.5f, .5f, .0f),	Vector3D(-.11f, .78f, .0f),		Vector3D(0, 1, 0),		Vector3D(1, 0, 1)},
-			{Vector3D(.5f, -.5f, .0f),	Vector3D(.75f, -.73f, .0f),		Vector3D(1, 0, 0),		Vector3D(1, 1, 0)},
-			{Vector3D(.5f, .5f, .0f),	Vector3D(.88f, .77f, .0f),		Vector3D(0, 1, 1),		Vector3D(1, 0, 0)}
+	vertex vertex_list[] = {  //for triangle strip
+			//(vec3)pos_1,					(vec3)pos1_1,					(vec3)color_1			(vec3)color1_1
+			//(vec3)pos_2,					(vec3)pos1_2,					(vec3)color_2			(vec3)color1_2
+			//(vec3)pos_3,					(vec3)pos1_3,					(vec3)color_3			(vec3)color1_3
+			//(vec3)pos_4,					(vec3)pos1_4,					(vec3)color_4			(vec3)color1_4
+			//{Vector3D(-.5f, -.5f, .0f),	Vector3D(-.32f, -.11f, .0f),	Vector3D(0, 0, 1),		Vector3D(1, 1, 0)},
+			//{Vector3D(-.5f, .5f, .0f),	Vector3D(-.11f, .78f, .0f),		Vector3D(0, 1, 0),		Vector3D(1, 0, 1)},
+			//{Vector3D(.5f, -.5f, .0f),	Vector3D(.75f, -.73f, .0f),		Vector3D(1, 0, 0),		Vector3D(1, 1, 0)},
+			//{Vector3D(.5f, .5f, .0f),	    Vector3D(.88f, .77f, .0f),		Vector3D(0, 1, 1),		Vector3D(1, 0, 0)}
+
+			// DATA STRUCT
+			//(vec3)pos_1,					(vec3)color_1			(vec3)color1_1
+			//(vec3)pos_2,					(vec3)color_2			(vec3)color1_2
+			//(vec3)pos_3,					(vec3)color_3			(vec3)color1_3
+			//(vec3)pos_4,					(vec3)color_4			(vec3)color1_4
+
+			/* FRONT */
+			{Vector3D(-.5f, -.5f, -.5f),	Vector3D(0, 0, 1),		Vector3D(1, 1, 0)},
+			{Vector3D(-.5f, .5f, -.5f),		Vector3D(0, 1, 0),		Vector3D(1, 0, 1)},
+			{Vector3D(.5f, .5f, -.5f),		Vector3D(1, 0, 0),		Vector3D(1, 1, 0)},
+			{Vector3D(.5f, -.5f, -.5f),		Vector3D(0, 1, 1),		Vector3D(1, 0, 0)},
+
+			/* BEHIND */
+			{Vector3D(.5f, -.5f, .5f),		Vector3D(0, 0, 1),		Vector3D(1, 1, 0)},
+			{Vector3D(.5f, .5f, .5f),		Vector3D(0, 1, 0),		Vector3D(1, 0, 1)},
+			{Vector3D(-.5f, .5f, .5f),		Vector3D(1, 0, 0),		Vector3D(1, 1, 0)},
+			{Vector3D(-.5f, -.5f, .5f),		Vector3D(0, 1, 1),		Vector3D(1, 0, 0)}
 	};
 
 	m_vertex_buffer = GraphicsEngine::get()->createVertexBuffer();
-	UINT size_list = ARRAYSIZE(list);
+	UINT size_list = ARRAYSIZE(vertex_list);
+
+	unsigned int index_list[] = {
+		/* FRONT */
+		0, 1, 2,  // 1st triangle
+		2, 3, 0,  // 2nd triangle
+
+		/* BACK */
+		4, 5, 6,  // 1st triangle
+		6, 7, 4,  // 2nd triangle
+
+		/* TOP */
+		1, 6, 5,  // 1st triangle
+		5, 2, 1,  // 2nd triangle
+
+		/* BOTTOM */
+		7, 0, 3,  // 1st triangle
+		3, 4, 7,  // 2nd triangle
+
+		/* RIGHT */
+		3, 2, 5,  // 1st triangle
+		5, 4, 3,  // 2nd triangle
+
+		/* LEFT */
+		7, 6, 1,  // 1st triangle
+		1, 0, 7,  // 2nd triangle
+	};
+
+	m_index_buffer = GraphicsEngine::get()->createIndexBuffer();
+	UINT size_index_list = ARRAYSIZE(index_list);
+	m_index_buffer->load(index_list, size_index_list);
+
 	//GraphicsEngine::get()->createShaders();
 
 	void* shader_byte_code = nullptr;
@@ -103,7 +168,7 @@ void AppWindow::onCreate()
 	GraphicsEngine::get()->compileVertexShader(L"VertexShader.hlsl", "vsmain", &shader_byte_code, &size_shader);
 	
 	m_vertex_shader = GraphicsEngine::get()->createVertexShader(shader_byte_code, size_shader);
-	m_vertex_buffer->load(list, sizeof(vertex), size_list, shader_byte_code, size_shader);
+	m_vertex_buffer->load(vertex_list, sizeof(vertex), size_list, shader_byte_code, size_shader);
 	
 	GraphicsEngine::get()->releaseCompiledShader();
 
@@ -148,11 +213,17 @@ void AppWindow::onUpdate()
 	GraphicsEngine::get()->getImmediateDeviceContext()->setVertexShader(m_vertex_shader);
 	GraphicsEngine::get()->getImmediateDeviceContext()->setPixelShader(m_pixel_shader);
 
+	//set the vertices of the object to draw
 	GraphicsEngine::get()->getImmediateDeviceContext()->setVertexBuffer(m_vertex_buffer);
+
+	//set the indices of the object
+	GraphicsEngine::get()->getImmediateDeviceContext()->setIndexBuffer(m_index_buffer);
+
 
 	/* drawing */
 	//GraphicsEngine::get()->getImmediateDeviceContext()->drawTriangleList(m_vertex_buffer->getSizeVertexList(), 0);
-	GraphicsEngine::get()->getImmediateDeviceContext()->drawTriangleStrip(m_vertex_buffer->getSizeVertexList(), 0);
+	//GraphicsEngine::get()->getImmediateDeviceContext()->drawTriangleStrip(m_vertex_buffer->getSizeVertexList(), 0);
+	GraphicsEngine::get()->getImmediateDeviceContext()->drawIndexedTriangleList(m_index_buffer->getSizeIndexList(), 0, 0);
 
 	m_swap_chain->present(false);
 
@@ -165,6 +236,8 @@ void AppWindow::onDestroy()
 {
 	Window::onDestroy();
 	m_vertex_buffer->release();
+	m_index_buffer->release();
+	m_constant_buffer->release();
 	m_swap_chain->release();
 	m_vertex_shader->release();
 	m_pixel_shader->release();
