@@ -2,9 +2,7 @@
 Game Engine Project ("Burden")
 
 # **Roadmap:**
-*done*
-
-**todo**
+(*done* / **todo**)
 
 *1-game development*
 
