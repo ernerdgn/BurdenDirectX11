@@ -15,19 +15,26 @@ struct VERTEX_SHADER_OUTPUT
 
 cbuffer constant : register(b0)
 {
-    float m_angle;
+    row_major float4x4 m_world;
+    row_major float4x4 m_view;
+    row_major float4x4 m_projection;
+    
+    unsigned int m_time;
 };
 
 VERTEX_SHADER_OUTPUT vsmain(VERTEX_SHADER_INPUT input)
 {
-    //if (pos.y > 0 && pos.y < 1)
-    //    pos.x += .25f;
-    
-    //if (pos.y > 0 && pos.y < 1 && pos.x > -1 && pos.x < 0)
-    //    pos.y -= .25f;
     VERTEX_SHADER_OUTPUT output = (VERTEX_SHADER_OUTPUT) 0;
     
-    output.pos = lerp(input.pos, input.pos1, (sin(m_angle) + 1.0f) / 2.0f);
+    //output.pos = lerp(input.pos, input.pos1, (sin(m_angle) + 1.0f) / 2.0f);
+    
+    /* WORLD SPACE */
+    output.pos = mul(input.pos, m_world); //mul(): matrix multiplication method
+    /* VIEW SPACE */
+    output.pos = mul(output.pos, m_view);
+    /* PROJECTION SPACE */
+    output.pos = mul(output.pos, m_projection);
+    
     output.color = input.color;
     output.color1 = input.color1;
 	

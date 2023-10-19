@@ -1,27 +1,64 @@
 #include "AppWindow.h"
 #include <Windows.h>
+#include "Vector3D.h"
+#include "Matrix4x4.h"
 
-struct vec3
-{
-	float x, y, z;
-};
+//struct vec3
+//{
+//	float x, y, z;
+//};
 
 struct vertex
 {
-	vec3 pos;
-	vec3 pos1;
-	vec3 color;
-	vec3 color1;
+	Vector3D pos;
+	Vector3D pos1;
+	Vector3D color;
+	Vector3D color1;
 };
 
 __declspec(align(16))  //16/32 bytes alignation
 struct constant
 {
-	float m_angle;
+	Matrix4x4 m_view;
+	Matrix4x4 m_world;
+	Matrix4x4 m_projection;
+	unsigned int m_time;
 };
 
 AppWindow::AppWindow()
 {
+}
+
+void AppWindow::updateQuadPos()
+{
+	//m_angle += 1.5707f * m_delta_time;  //(pi / 2) * delta_time 
+	constant const_obj;
+	const_obj.m_time = ::GetTickCount();
+
+	m_delta_pos += m_delta_time / 10.0f;
+
+	if (m_delta_pos > 1.0f) m_delta_pos = 0;
+
+	Matrix4x4 temp;
+
+	m_delta_scale += m_delta_time / .15f;
+
+	//const_obj.m_world.setTranslationMatrix(Vector3D(0,0,0));
+	//const_obj.m_world.setTranslationMatrix(Vector3D::lerp(Vector3D(-2, -2, 0), Vector3D(2, 2, 0), m_delta_pos));
+	const_obj.m_world.setScaleMatrix(Vector3D::lerp(Vector3D(.5, .5, 0), Vector3D(1.0f, 1.0f, 0), (sin(m_delta_scale)+1.0f)/2.0f));
+	temp.setTranslationMatrix(Vector3D::lerp(Vector3D(-1.5f, -1.5f, 0), Vector3D(1.5f, 1.5f, 0), m_delta_pos));
+	
+	const_obj.m_world *= temp;
+
+	const_obj.m_view.setIdentityMatrix();
+	const_obj.m_projection.setOrthogonalProjectionMatrix(
+		(this->getClientWindowRect().right - this->getClientWindowRect().left) / 400.0f,
+		(this->getClientWindowRect().bottom - this->getClientWindowRect().top) / 400.0f,
+		-4.0f,
+		4.0f
+	);
+
+	m_constant_buffer->update(GraphicsEngine::get()->getImmediateDeviceContext(), &const_obj);  //constant buffer updating
 }
 
 AppWindow::~AppWindow()
@@ -48,10 +85,10 @@ void AppWindow::onCreate()
 			//(vec3)pos_2,		(vec3)pos1_2,			(vec3)color_2			(vec3)color1_2
 			//(vec3)pos_3,		(vec3)pos1_3,			(vec3)color_3			(vec3)color1_3
 			//(vec3)pos_4,		(vec3)pos1_4,			(vec3)color_4			(vec3)color1_4
-			{-.5f, -.5f, .0f,	-.32f, -.11f, .0f,		0, 0, 1,		1, 1, 0},
-			{-.5f, .5f, .0f,	-.11f, .78f, .0f,		0, 1, 0,		1, 0, 1},
-			{.5f, -.5f, .0f,	.75f, -.73f, .0f,		1, 0, 0,		1, 1, 0},
-			{.5f, .5f, .0f,		.88f, .77f, .0f,		0, 1, 1,		1, 0, 0}
+			{Vector3D(-.5f, -.5f, .0f),	Vector3D(-.32f, -.11f, .0f),	Vector3D(0, 0, 1),		Vector3D(1, 1, 0)},
+			{Vector3D(-.5f, .5f, .0f),	Vector3D(-.11f, .78f, .0f),		Vector3D(0, 1, 0),		Vector3D(1, 0, 1)},
+			{Vector3D(.5f, -.5f, .0f),	Vector3D(.75f, -.73f, .0f),		Vector3D(1, 0, 0),		Vector3D(1, 1, 0)},
+			{Vector3D(.5f, .5f, .0f),	Vector3D(.88f, .77f, .0f),		Vector3D(0, 1, 1),		Vector3D(1, 0, 0)}
 	};
 
 	m_vertex_buffer = GraphicsEngine::get()->createVertexBuffer();
@@ -81,7 +118,7 @@ void AppWindow::onCreate()
 
 	/* CONSTANT BUFFER */
 	constant const_obj;
-	const_obj.m_angle = 0;
+	const_obj.m_time = 0;
 
 	m_constant_buffer = GraphicsEngine::get()->createConstantBuffer();
 
@@ -100,17 +137,9 @@ void AppWindow::onUpdate()
 	//GraphicsEngine::get()->setShaders();
 
 	/* constant buffer updates */
-	unsigned long new_time = 0;
-	if (m_old_time) new_time = ::GetTickCount() - m_old_time;
-	m_delta_time = new_time / 1000.0f;
-	m_old_time = ::GetTickCount();
-
-	m_angle += 1.5707f * m_delta_time;
-	constant const_obj;
-	const_obj.m_angle = m_angle;
 	//const_obj.m_angle = ::GetTickCount();  //get the time(ms) elapsed since the sys has started (winAPI)
 	// flag
-	m_constant_buffer->update(GraphicsEngine::get()->getImmediateDeviceContext(), &const_obj);  //constant buffer updating
+	updateQuadPos();
 
 	GraphicsEngine::get()->getImmediateDeviceContext()->setConstantBuffer(m_vertex_shader, m_constant_buffer);
 	GraphicsEngine::get()->getImmediateDeviceContext()->setConstantBuffer(m_pixel_shader, m_constant_buffer);
@@ -126,6 +155,10 @@ void AppWindow::onUpdate()
 	GraphicsEngine::get()->getImmediateDeviceContext()->drawTriangleStrip(m_vertex_buffer->getSizeVertexList(), 0);
 
 	m_swap_chain->present(false);
+
+	m_old_delta = m_new_delta;
+	m_new_delta = ::GetTickCount();
+	m_delta_time = (m_old_delta) ? ((m_new_delta - m_old_delta) / 1000.0f) : 0;
 }
 
 void AppWindow::onDestroy()

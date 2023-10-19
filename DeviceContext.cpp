@@ -5,6 +5,8 @@
 #include "PixelShader.h"
 #include "ConstantBuffer.h"
 
+#include <iostream>
+
 DeviceContext::DeviceContext(ID3D11DeviceContext* device_context):m_device_context(device_context)
 {
 }
