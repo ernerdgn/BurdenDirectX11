@@ -1,7 +1,6 @@
 #include "AppWindow.h"
 #include <Windows.h>
-#include "Vector3D.h"
-#include "Matrix4x4.h"
+#include <iostream>
 
 //struct vec3
 //{
@@ -53,17 +52,20 @@ void AppWindow::updateQuadPos()
 
 	//x-rotation
 	temp.setIdentityMatrix();
-	temp.setRotationXMatrix(m_delta_scale);
+	temp.setRotationXMatrix(m_rotation_x);
+	//temp.setRotationXMatrix(m_delta_scale);
 	const_obj.m_world *= temp;
 
 	//y-rotation
 	temp.setIdentityMatrix();
-	temp.setRotationYMatrix(m_delta_scale);
+	temp.setRotationYMatrix(m_rotation_y);
+	//temp.setRotationYMatrix(m_delta_scale);
 	const_obj.m_world *= temp;
 
 	//z-rotation
 	temp.setIdentityMatrix();
-	temp.setRotationZMatrix(m_delta_scale);
+	temp.setRotationZMatrix(.0f);
+	//temp.setRotationZMatrix(m_delta_scale);
 	const_obj.m_world *= temp;
 
 	const_obj.m_view.setIdentityMatrix();
@@ -84,6 +86,9 @@ AppWindow::~AppWindow()
 void AppWindow::onCreate()
 {
 	Window::onCreate();
+
+	InputSystem::get()->addListener(this);
+
 	GraphicsEngine::get()->init();
 	m_swap_chain = GraphicsEngine::get()->createSwapChain();
 
@@ -119,10 +124,10 @@ void AppWindow::onCreate()
 			{Vector3D(.5f, -.5f, -.5f),		Vector3D(0, 1, 1),		Vector3D(1, 0, 0)},
 
 			/* BEHIND */
-			{Vector3D(.5f, -.5f, .5f),		Vector3D(0, 0, 1),		Vector3D(1, 1, 0)},
-			{Vector3D(.5f, .5f, .5f),		Vector3D(0, 1, 0),		Vector3D(1, 0, 1)},
-			{Vector3D(-.5f, .5f, .5f),		Vector3D(1, 0, 0),		Vector3D(1, 1, 0)},
-			{Vector3D(-.5f, -.5f, .5f),		Vector3D(0, 1, 1),		Vector3D(1, 0, 0)}
+			{Vector3D(.5f, -.5f, .5f),		Vector3D(1, 0, 0),		Vector3D(0, 1, 1)},
+			{Vector3D(.5f, .5f, .5f),		Vector3D(0, 1, 0),		Vector3D(0, 1, 0)},
+			{Vector3D(-.5f, .5f, .5f),		Vector3D(0, 0, 1),		Vector3D(0, 1, 1)},
+			{Vector3D(-.5f, -.5f, .5f),		Vector3D(1, 1, 0),		Vector3D(0, 0, 1)}
 	};
 
 	m_vertex_buffer = GraphicsEngine::get()->createVertexBuffer();
@@ -193,6 +198,9 @@ void AppWindow::onCreate()
 void AppWindow::onUpdate()
 {
 	Window::onUpdate();
+
+	InputSystem::get()->update();
+
 	/*clearing the render target*/
 	GraphicsEngine::get()->getImmediateDeviceContext()->clearRenderTargetColor(this->m_swap_chain, 0.125f, 0.025f, 0.125f, 0.075f);
 
@@ -242,4 +250,17 @@ void AppWindow::onDestroy()
 	m_vertex_shader->release();
 	m_pixel_shader->release();
 	GraphicsEngine::get()->release();
+}
+
+void AppWindow::onKeyDown(int key)
+{
+	if (key == 'W') m_rotation_x += 3.1415f * m_delta_time;
+	else if (key == 'S') m_rotation_x -= 3.1415f * m_delta_time;
+	else if (key == 'D') m_rotation_y -= 3.1415f * m_delta_time;
+	else if (key == 'A') m_rotation_y += 3.1415f * m_delta_time;
+}
+
+void AppWindow::onKeyUp(int key)
+{
+
 }

@@ -8,18 +8,26 @@
 #include "PixelShader.h"
 #include "ConstantBuffer.h"
 #include "IndexBuffer.h"
+#include "Vector3D.h"
+#include "Matrix4x4.h"
+#include "InputListener.h"
+#include "InputSystem.h"
 
-class AppWindow : public Window
+class AppWindow : public Window, public InputListener
 {
 public:
 	AppWindow();
 	void updateQuadPos();
 	~AppWindow();
 
-	//inheritence
+	//inheritence from window
 	virtual void onCreate() override;
 	virtual void onUpdate() override;
 	virtual void onDestroy() override;
+
+	//inheritence from inputListener
+	virtual void onKeyDown(int key) override;
+	virtual void onKeyUp(int key) override;
 
 private:
 	SwapChain* m_swap_chain;
@@ -35,4 +43,7 @@ private:
 
 	float m_delta_pos;
 	float m_delta_scale;
+
+	float m_rotation_x = .0f;
+	float m_rotation_y = .0f;
 };
