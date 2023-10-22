@@ -2,7 +2,7 @@
 Game Engine Project ("Burden")
 
 # **Roadmap:**
-(*done* / **todo**)
+__(*done* / **todo**)__
 
 *1-game development*
 
@@ -24,11 +24,11 @@ Game Engine Project ("Burden")
 
 *10-basic animations*
 
-**11-rendering 3d objects**
+*11-rendering 3d objects*
 
-**12-keyboard control**
+*12-keyboard control*
 
-**13-mouse control**
+*13-mouse control*
 
 **14-camera control**
 

@@ -1,7 +1,5 @@
 #include "Window.h"
 
-//Window* window = nullptr;
-
 Window::Window()
 {
 }
@@ -56,8 +54,6 @@ bool Window::init()
 
 	if (!::RegisterClassEx(&wc))
 		return false;
-
-	//if (!window) window = this;
 
 	m_hwnd = ::CreateWindowEx(WS_EX_OVERLAPPEDWINDOW, L"WindowClass", L"Burden Engine", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT,
 		1024, 768,

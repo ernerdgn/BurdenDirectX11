@@ -8,10 +8,7 @@
 #include "PixelShader.h"
 #include "ConstantBuffer.h"
 #include "IndexBuffer.h"
-#include "Vector3D.h"
-#include "Matrix4x4.h"
 #include "InputListener.h"
-#include "InputSystem.h"
 
 class AppWindow : public Window, public InputListener
 {
@@ -28,6 +25,11 @@ public:
 	//inheritence from inputListener
 	virtual void onKeyDown(int key) override;
 	virtual void onKeyUp(int key) override;
+	virtual void onMouseMove(const Point& delta_mouse_position) override;
+	virtual void onLeftMouseButtonDown(const Point& mouse_position) override;
+	virtual void onLeftMouseButtonUp(const Point& mouse_position) override;
+	virtual void onRightMouseButtonDown(const Point& mouse_position) override;
+	virtual void onRightMouseButtonUp(const Point& mouse_position) override;
 
 private:
 	SwapChain* m_swap_chain;
@@ -37,8 +39,8 @@ private:
 	ConstantBuffer* m_constant_buffer;
 	IndexBuffer* m_index_buffer;
 
-	float m_old_delta;
-	float m_new_delta;
+	long m_old_delta;
+	long m_new_delta;
 	float m_delta_time;
 
 	float m_delta_pos;
@@ -46,4 +48,9 @@ private:
 
 	float m_rotation_x = .0f;
 	float m_rotation_y = .0f;
+
+	bool is_pressed_left = false;
+	bool is_pressed_right = false;
+
+	float m_scale_with_tick = 1;
 };

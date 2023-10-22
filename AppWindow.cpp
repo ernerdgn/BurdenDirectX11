@@ -1,6 +1,11 @@
 #include "AppWindow.h"
+#include "Vector3D.h"
+#include "Matrix4x4.h"
+#include "InputSystem.h"
+
 #include <Windows.h>
 #include <iostream>
+#include <chrono>
 
 //struct vec3
 //{
@@ -15,7 +20,7 @@ struct vertex
 	Vector3D color1;
 };
 
-__declspec(align(16))  //16/32 bytes alignation
+__declspec(align(16))  //16 bytes alignation
 struct constant
 {
 	Matrix4x4 m_view;
@@ -30,7 +35,6 @@ AppWindow::AppWindow()
 
 void AppWindow::updateQuadPos()
 {
-	//m_angle += 1.5707f * m_delta_time;  //(pi / 2) * delta_time 
 	constant const_obj;
 	const_obj.m_time = ::GetTickCount();
 
@@ -48,12 +52,13 @@ void AppWindow::updateQuadPos()
 	//temp.setTranslationMatrix(Vector3D::lerp(Vector3D(-1.5f, -1.5f, 0), Vector3D(1.5f, 1.5f, 0), m_delta_pos));
 	
 	//const_obj.m_world *= temp;
-	const_obj.m_world.setScaleMatrix(Vector3D(1, 1, 1));
+	const_obj.m_world.setScaleMatrix(Vector3D(m_scale_with_tick, m_scale_with_tick, m_scale_with_tick));
+	//const_obj.m_world.setScaleMatrix(Vector3D(1, 1, 1));
 
-	//x-rotation
+	//z-rotation
 	temp.setIdentityMatrix();
-	temp.setRotationXMatrix(m_rotation_x);
-	//temp.setRotationXMatrix(m_delta_scale);
+	temp.setRotationZMatrix(.0f);
+	//temp.setRotationZMatrix(m_delta_scale);
 	const_obj.m_world *= temp;
 
 	//y-rotation
@@ -62,16 +67,16 @@ void AppWindow::updateQuadPos()
 	//temp.setRotationYMatrix(m_delta_scale);
 	const_obj.m_world *= temp;
 
-	//z-rotation
+	//x-rotation
 	temp.setIdentityMatrix();
-	temp.setRotationZMatrix(.0f);
-	//temp.setRotationZMatrix(m_delta_scale);
+	temp.setRotationXMatrix(m_rotation_x);
+	//temp.setRotationXMatrix(m_delta_scale);
 	const_obj.m_world *= temp;
 
 	const_obj.m_view.setIdentityMatrix();
 	const_obj.m_projection.setOrthogonalProjectionMatrix(
-		(this->getClientWindowRect().right - this->getClientWindowRect().left) / 400.0f,
-		(this->getClientWindowRect().bottom - this->getClientWindowRect().top) / 400.0f,
+		(this->getClientWindowRect().right - this->getClientWindowRect().left) / 300.0f,
+		(this->getClientWindowRect().bottom - this->getClientWindowRect().top) / 300.0f,
 		-4.0f,
 		4.0f
 	);
@@ -202,7 +207,7 @@ void AppWindow::onUpdate()
 	InputSystem::get()->update();
 
 	/*clearing the render target*/
-	GraphicsEngine::get()->getImmediateDeviceContext()->clearRenderTargetColor(this->m_swap_chain, 0.125f, 0.025f, 0.125f, 0.075f);
+	GraphicsEngine::get()->getImmediateDeviceContext()->clearRenderTargetColor(this->m_swap_chain, 0.125f, 0.025f, 0.125f, 1);
 
 	/*set viewport of render target (which to draw)*/
 	RECT rc = this->getClientWindowRect();
@@ -235,9 +240,14 @@ void AppWindow::onUpdate()
 
 	m_swap_chain->present(false);
 
+	
 	m_old_delta = m_new_delta;
 	m_new_delta = ::GetTickCount();
+	Sleep(1);
 	m_delta_time = (m_old_delta) ? ((m_new_delta - m_old_delta) / 1000.0f) : 0;
+	//if (m_delta_time == 0) counter++;
+	//else counter = 0;
+	//std::cout << "RATE: " << counter << std::endl;
 }
 
 void AppWindow::onDestroy()
@@ -262,5 +272,51 @@ void AppWindow::onKeyDown(int key)
 
 void AppWindow::onKeyUp(int key)
 {
+	
+}
 
+void AppWindow::onMouseMove(const Point& delta_mouse_position)
+{
+	if (is_pressed_left)
+	{
+		m_rotation_x -= delta_mouse_position.m_y * m_delta_time;
+		m_rotation_y -= delta_mouse_position.m_x * m_delta_time;
+	}
+
+	if (is_pressed_right)
+	{
+		m_scale_with_tick += delta_mouse_position.m_x * m_delta_time;
+		if (m_scale_with_tick < 0) m_scale_with_tick = 0;
+		//std::cout << delta_mouse_position.m_x << std::endl;
+	}
+	//m_rotation_x -= delta_mouse_position.m_y * 0.015f;
+	//m_rotation_y -= delta_mouse_position.m_x * 0.015f;
+}
+
+void AppWindow::onLeftMouseButtonDown(const Point& mouse_position)
+{
+	//m_scale_with_tick = 1.15;
+	//std::cout << "left mouse down" << std::endl;
+	is_pressed_left = true;
+}
+
+void AppWindow::onLeftMouseButtonUp(const Point& mouse_position)
+{
+	//m_scale_with_tick = 1.0f;
+	is_pressed_left = false;
+	//std::cout << "left mouse UP" << std::endl;
+}
+
+void AppWindow::onRightMouseButtonDown(const Point& mouse_position)
+{
+	//m_scale_with_tick = .5f;
+	//std::cout << "right mouse down" << std::endl;
+	is_pressed_right = true;
+}
+
+void AppWindow::onRightMouseButtonUp(const Point& mouse_position)
+{
+	//m_scale_with_tick = 1.0f;
+	is_pressed_right = false;
+	//std::cout << "right mouse UP" << std::endl;
 }
