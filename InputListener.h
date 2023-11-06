@@ -20,7 +20,7 @@ public:
 
 	/* MOUSE */
 	//pure virtual callback
-	virtual void onMouseMove(const Point& delta_mouse_position) = 0;
+	virtual void onMouseMove(const Point& mouse_position) = 0;
 
 	virtual void onLeftMouseButtonDown(const Point& mouse_position) = 0;
 	virtual void onLeftMouseButtonUp(const Point& mouse_position) = 0;

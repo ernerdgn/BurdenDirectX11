@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 #include "Vector3D.h"
+#include "Vector4D.h"
 
 class Matrix4x4
 {
@@ -22,10 +23,7 @@ public:
 
 	void setTranslationMatrix(const Vector3D& translation)
 	{
-		setIdentityMatrix();
-		//float list[3] = { translation.m_x, translation.m_y, translation.m_z };
-		//for (int i = 0; i < 3; i++)
-		//	m_matrix[3][i] = list[i];
+		//setIdentityMatrix();
 
 		m_matrix[3][0] = translation.m_x;
 		m_matrix[3][1] = translation.m_y;
@@ -34,10 +32,7 @@ public:
 
 	void setScaleMatrix(const Vector3D& scale)
 	{
-		setIdentityMatrix();
-		//float list[3] = { scale.m_x, scale.m_y, scale.m_z };
-		//for (int i = 0; i < 3; i++) 
-		//	m_matrix[i][i] = list[i];
+		//setIdentityMatrix();
 
 		m_matrix[0][0] = scale.m_x;
 		m_matrix[1][1] = scale.m_y;
@@ -46,25 +41,6 @@ public:
 
 	void setRotationXMatrix(float x)
 	{
-		//float list[4] = {cos(x), sin(x), -sin(x), cos(x)};
-		//int i=1;
-		//if (i == 1)
-		//{
-		//	for (int j = 1; j <= 2; j++)
-		//	{
-		//		m_matrix[i][j] = list[j - 1];
-		//	}
-		//	i++;
-		//}
-
-		//else if (i == 2)
-		//{
-		//	for (int j = 1; j <= 2; j++)
-		//	{
-		//		m_matrix[i][j] = list[j + 1];
-		//	}
-		//}
-			
 		m_matrix[1][1] = cos(x);
 		m_matrix[1][2] = sin(x);
 		m_matrix[2][1] = -sin(x);
@@ -73,28 +49,10 @@ public:
 
 	void setRotationYMatrix(float y)
 	{
-
-		//float list[4] = {cos(y), -sin(y), sin(y), cos(y)};
-
-		//if (int i == 0)
-		//{
-		//	for (int j = 0; j <= 2; j = j + 2)
-		//	{
-		//		m_matrix[i][j] = list[j]
-
-		//	}
-
-		//}
-
-		//else if (int i = 2);
-		//	for (int j = 0; j <= 2; j=j+2);
-		//		m_matrix[i][j] = list[j + 2]
-
 		m_matrix[0][0] = cos(y);
 		m_matrix[0][2] = -sin(y);
 		m_matrix[2][0] = sin(y);
 		m_matrix[2][2] = cos(y);
-
 	}
 
 	void setRotationZMatrix(float z)
@@ -103,6 +61,56 @@ public:
 		m_matrix[0][1] = sin(z);
 		m_matrix[1][0] = -sin(z);
 		m_matrix[1][1] = cos(z);
+	}
+
+	float getDeterminant()
+	{
+		Vector4D minor, v1, v2, v3;
+		float det;
+
+		v1 = Vector4D(this->m_matrix[0][0], this->m_matrix[1][0], this->m_matrix[2][0], this->m_matrix[3][0]);
+		v2 = Vector4D(this->m_matrix[0][1], this->m_matrix[1][1], this->m_matrix[2][1], this->m_matrix[3][1]);
+		v3 = Vector4D(this->m_matrix[0][2], this->m_matrix[1][2], this->m_matrix[2][2], this->m_matrix[3][2]);
+
+
+		minor.cross(v1, v2, v3);
+		det = -(this->m_matrix[0][3] * minor.m_x + this->m_matrix[1][3] * minor.m_y +
+			this->m_matrix[2][3] * minor.m_z + this->m_matrix[3][3] * minor.m_w);
+		return det;
+	}
+
+	void inverse()
+	{
+		int a, i, j;
+		Matrix4x4 out;
+		Vector4D v, vec[3];
+		float det = 0.0f;
+
+		det = this->getDeterminant();
+		if (!det) return;
+		for (i = 0; i < 4; i++)
+		{
+			for (j = 0; j < 4; j++)
+			{
+				if (j != i)
+				{
+					a = j;
+					if (j > i) a = a - 1;
+					vec[a].m_x = (this->m_matrix[j][0]);
+					vec[a].m_y = (this->m_matrix[j][1]);
+					vec[a].m_z = (this->m_matrix[j][2]);
+					vec[a].m_w = (this->m_matrix[j][3]);
+				}
+			}
+			v.cross(vec[0], vec[1], vec[2]);
+
+			out.m_matrix[0][i] = pow(-1.0f, i) * v.m_x / det;
+			out.m_matrix[1][i] = pow(-1.0f, i) * v.m_y / det;
+			out.m_matrix[2][i] = pow(-1.0f, i) * v.m_z / det;
+			out.m_matrix[3][i] = pow(-1.0f, i) * v.m_w / det;
+		}
+
+		this->setMatrix(out);
 	}
 
 	void operator *=(const Matrix4x4& matrix)
@@ -119,6 +127,39 @@ public:
 		}
 		
 		::memcpy(m_matrix, result.m_matrix, sizeof(float) * 16);
+	}
+
+	void setMatrix(const Matrix4x4& matrix)
+	{
+		::memcpy(m_matrix, matrix.m_matrix, sizeof(float) * 16);
+	}
+
+	Vector3D getZDirection()
+	{
+		return Vector3D(m_matrix[2][0], m_matrix[2][1], m_matrix[2][2]);
+	}
+
+	Vector3D getXDirection()
+	{
+		return Vector3D(m_matrix[0][0], m_matrix[0][1], m_matrix[0][2]);
+	}
+
+	Vector3D getTranslation()
+	{
+		return Vector3D(m_matrix[3][0], m_matrix[3][1], m_matrix[3][2]);
+	}
+
+	void setPerspectiveFovLH(float fov, float aspect, float znear, float zfar)
+	{
+		float y_scale = 1.0f / tan(fov / 2.0f);
+		float x_scale = y_scale / aspect;
+
+		m_matrix[0][0] = x_scale;
+		m_matrix[1][1] = y_scale;
+		m_matrix[2][2] = zfar / (zfar - znear);
+		m_matrix[2][3] = 1.0f;
+		m_matrix[3][2] = (-znear * zfar) / (zfar - znear);
+
 	}
 
 	void setOrthogonalProjectionMatrix(float width, float height, float near_plane, float far_plane)

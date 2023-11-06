@@ -9,12 +9,13 @@
 #include "ConstantBuffer.h"
 #include "IndexBuffer.h"
 #include "InputListener.h"
+#include "Matrix4x4.h"
 
 class AppWindow : public Window, public InputListener
 {
 public:
 	AppWindow();
-	void updateQuadPos();
+	void update();
 	~AppWindow();
 
 	//inheritence from window
@@ -25,7 +26,7 @@ public:
 	//inheritence from inputListener
 	virtual void onKeyDown(int key) override;
 	virtual void onKeyUp(int key) override;
-	virtual void onMouseMove(const Point& delta_mouse_position) override;
+	virtual void onMouseMove(const Point& mouse_position) override;
 	virtual void onLeftMouseButtonDown(const Point& mouse_position) override;
 	virtual void onLeftMouseButtonUp(const Point& mouse_position) override;
 	virtual void onRightMouseButtonDown(const Point& mouse_position) override;
@@ -53,4 +54,10 @@ private:
 	bool is_pressed_right = false;
 
 	float m_scale_with_tick = 1;
+
+	//cam
+	float m_forward = .0f;
+	float m_horizontal_move_coefficient = .0f;  //right is positive due to the LH coord sys
+
+	Matrix4x4 m_world_cam;
 };

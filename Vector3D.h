@@ -27,6 +27,16 @@ public:
 		return vectorl;
 	}
 
+	Vector3D operator *(float num)
+	{
+		return Vector3D(m_x * num, m_y * num, m_z * num);
+	}
+
+	Vector3D operator +(Vector3D adding_vec)
+	{
+		return Vector3D(m_x + adding_vec.m_x, m_y + adding_vec.m_y, m_z + adding_vec.m_z);
+	}
+
 	~Vector3D()
 	{
 

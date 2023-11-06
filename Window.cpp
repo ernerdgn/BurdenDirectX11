@@ -114,7 +114,7 @@ bool Window::broadcast()
 		DispatchMessage(&msg);
 	}	
 
-	Sleep(0);
+	Sleep(1);
 
 	return true;
 }

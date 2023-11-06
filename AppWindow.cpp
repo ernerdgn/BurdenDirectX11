@@ -33,7 +33,7 @@ AppWindow::AppWindow()
 {
 }
 
-void AppWindow::updateQuadPos()
+void AppWindow::update()
 {
 	constant const_obj;
 	const_obj.m_time = ::GetTickCount();
@@ -51,35 +51,64 @@ void AppWindow::updateQuadPos()
 	//const_obj.m_world.setScaleMatrix(Vector3D::lerp(Vector3D(.5, .5, 0), Vector3D(1.0f, 1.0f, 0), (sin(m_delta_scale)+1.0f)/2.0f));
 	//temp.setTranslationMatrix(Vector3D::lerp(Vector3D(-1.5f, -1.5f, 0), Vector3D(1.5f, 1.5f, 0), m_delta_pos));
 	
+	/* before cam */
+	////const_obj.m_world *= temp;
+	//const_obj.m_world.setScaleMatrix(Vector3D(m_scale_with_tick, m_scale_with_tick, m_scale_with_tick));
+	////const_obj.m_world.setScaleMatrix(Vector3D(1, 1, 1));
+
+	////z-rotation
+	//temp.setIdentityMatrix();
+	//temp.setRotationZMatrix(.0f);
+	////temp.setRotationZMatrix(m_delta_scale);
 	//const_obj.m_world *= temp;
-	const_obj.m_world.setScaleMatrix(Vector3D(m_scale_with_tick, m_scale_with_tick, m_scale_with_tick));
-	//const_obj.m_world.setScaleMatrix(Vector3D(1, 1, 1));
 
-	//z-rotation
-	temp.setIdentityMatrix();
-	temp.setRotationZMatrix(.0f);
-	//temp.setRotationZMatrix(m_delta_scale);
-	const_obj.m_world *= temp;
+	////y-rotation
+	//temp.setIdentityMatrix();
+	//temp.setRotationYMatrix(m_rotation_y);
+	////temp.setRotationYMatrix(m_delta_scale);
+	//const_obj.m_world *= temp;
 
-	//y-rotation
-	temp.setIdentityMatrix();
-	temp.setRotationYMatrix(m_rotation_y);
-	//temp.setRotationYMatrix(m_delta_scale);
-	const_obj.m_world *= temp;
+	////x-rotation
+	//temp.setIdentityMatrix();
+	//temp.setRotationXMatrix(m_rotation_x);
+	////temp.setRotationXMatrix(m_delta_scale);
+	//const_obj.m_world *= temp;
 
-	//x-rotation
+	const_obj.m_world.setIdentityMatrix();
+
+	Matrix4x4 world_cam;
+	world_cam.setIdentityMatrix();
+
 	temp.setIdentityMatrix();
 	temp.setRotationXMatrix(m_rotation_x);
-	//temp.setRotationXMatrix(m_delta_scale);
-	const_obj.m_world *= temp;
+	world_cam *= temp;
 
-	const_obj.m_view.setIdentityMatrix();
-	const_obj.m_projection.setOrthogonalProjectionMatrix(
-		(this->getClientWindowRect().right - this->getClientWindowRect().left) / 300.0f,
-		(this->getClientWindowRect().bottom - this->getClientWindowRect().top) / 300.0f,
-		-4.0f,
-		4.0f
-	);
+	temp.setIdentityMatrix();
+	temp.setRotationYMatrix(m_rotation_y);
+	world_cam *= temp;
+
+	Vector3D new_position = m_world_cam.getTranslation() + (world_cam.getZDirection() * (m_forward * .3f) + world_cam.getXDirection() * (m_horizontal_move_coefficient * .3f));
+
+	world_cam.setTranslationMatrix(new_position);
+
+	m_world_cam = world_cam;
+
+	world_cam.inverse();
+
+	//const_obj.m_view.setIdentityMatrix();
+	const_obj.m_view = world_cam;
+
+	//const_obj.m_projection.setOrthogonalProjectionMatrix(
+	//	(this->getClientWindowRect().right - this->getClientWindowRect().left) / 300.0f,
+	//	(this->getClientWindowRect().bottom - this->getClientWindowRect().top) / 300.0f,
+	//	-4.0f,
+	//	4.0f
+	//);
+
+	int width = this->getClientWindowRect().right - this->getClientWindowRect().left;
+	int height = this->getClientWindowRect().bottom - this->getClientWindowRect().top;
+
+	const_obj.m_projection.setPerspectiveFovLH(1.57079632f, ((float)width / (float)height), .1f, 100.0f);
 
 	m_constant_buffer->update(GraphicsEngine::get()->getImmediateDeviceContext(), &const_obj);  //constant buffer updating
 }
@@ -94,11 +123,16 @@ void AppWindow::onCreate()
 
 	InputSystem::get()->addListener(this);
 
+	InputSystem::get()->showCursor(false);
+
 	GraphicsEngine::get()->init();
 	m_swap_chain = GraphicsEngine::get()->createSwapChain();
 
 	RECT rc = this->getClientWindowRect();
 	m_swap_chain->init(this->m_hwnd, rc.right - rc.left, rc.bottom - rc.top);
+
+	//cam
+	m_world_cam.setTranslationMatrix(Vector3D(0, 0, -2));
 
 	//vertex list[] = {  //for triangle list
 	//	{-.5f, -.5f, .0f},  //pos1
@@ -217,7 +251,7 @@ void AppWindow::onUpdate()
 	/* constant buffer updates */
 	//const_obj.m_angle = ::GetTickCount();  //get the time(ms) elapsed since the sys has started (winAPI)
 	// flag
-	updateQuadPos();
+	update();
 
 	GraphicsEngine::get()->getImmediateDeviceContext()->setConstantBuffer(m_vertex_shader, m_constant_buffer);
 	GraphicsEngine::get()->getImmediateDeviceContext()->setConstantBuffer(m_pixel_shader, m_constant_buffer);
@@ -243,7 +277,7 @@ void AppWindow::onUpdate()
 	
 	m_old_delta = m_new_delta;
 	m_new_delta = ::GetTickCount();
-	Sleep(1);
+	//Sleep(1);
 	m_delta_time = (m_old_delta) ? ((m_new_delta - m_old_delta) / 1000.0f) : 0;
 	//if (m_delta_time == 0) counter++;
 	//else counter = 0;
@@ -264,33 +298,60 @@ void AppWindow::onDestroy()
 
 void AppWindow::onKeyDown(int key)
 {
-	if (key == 'W') m_rotation_x += 3.1415f * m_delta_time;
-	else if (key == 'S') m_rotation_x -= 3.1415f * m_delta_time;
-	else if (key == 'D') m_rotation_y -= 3.1415f * m_delta_time;
-	else if (key == 'A') m_rotation_y += 3.1415f * m_delta_time;
+	//if (key == 'W') m_rotation_x += 3.1415f * m_delta_time;
+	//else if (key == 'S') m_rotation_x -= 3.1415f * m_delta_time;
+	//else if (key == 'D') m_rotation_y -= 3.1415f * m_delta_time;
+	//else if (key == 'A') m_rotation_y += 3.1415f * m_delta_time;
+
+	if (key == 'W')
+	{
+		m_forward = 1.0f;
+	}
+	else if (key == 'S')
+	{
+		m_forward = -1.0f;
+	}
+	else if (key == 'D')
+	{
+		m_horizontal_move_coefficient = 1.0f;
+	}
+	else if (key == 'A')
+	{
+		m_horizontal_move_coefficient = -1.0f;
+	}
 }
 
 void AppWindow::onKeyUp(int key)
 {
-	
+	m_forward = .0f;
+	m_horizontal_move_coefficient = .0f;
 }
 
-void AppWindow::onMouseMove(const Point& delta_mouse_position)
+void AppWindow::onMouseMove(const Point& mouse_position)
 {
-	if (is_pressed_left)
-	{
-		m_rotation_x -= delta_mouse_position.m_y * m_delta_time;
-		m_rotation_y -= delta_mouse_position.m_x * m_delta_time;
-	}
+	//if (is_pressed_left)
+	//{
+	//	m_rotation_x -= delta_mouse_position.m_y * m_delta_time;
+	//	m_rotation_y -= delta_mouse_position.m_x * m_delta_time;
+	//}
 
-	if (is_pressed_right)
-	{
-		m_scale_with_tick += delta_mouse_position.m_x * m_delta_time;
-		if (m_scale_with_tick < 0) m_scale_with_tick = 0;
-		//std::cout << delta_mouse_position.m_x << std::endl;
-	}
-	//m_rotation_x -= delta_mouse_position.m_y * 0.015f;
+	//if (is_pressed_right)
+	//{
+	//	m_scale_with_tick += delta_mouse_position.m_x * m_delta_time;
+	//	if (m_scale_with_tick < 0) m_scale_with_tick = 0;
+	//	//std::cout << delta_mouse_position.m_x << std::endl;
+	//}
+
+	//m_rotation_x -= delta_mouse_position.m_y * 0.015f;  //m_delta_time
 	//m_rotation_y -= delta_mouse_position.m_x * 0.015f;
+
+	int width = this->getClientWindowRect().right - this->getClientWindowRect().left;
+	int height = this->getClientWindowRect().bottom - this->getClientWindowRect().top;
+
+	m_rotation_x += (mouse_position.m_y - (height / 2)) * m_delta_time * .1f;
+	m_rotation_y += (mouse_position.m_x - (width / 2)) * m_delta_time * .1f;
+
+	InputSystem::get()->setCursorPosition(Point(width / 2, height / 2));
 }
 
 void AppWindow::onLeftMouseButtonDown(const Point& mouse_position)
