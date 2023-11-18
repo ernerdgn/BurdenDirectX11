@@ -256,7 +256,7 @@ void AppWindow::onUpdate()
 	GraphicsEngine::get()->getImmediateDeviceContext()->setConstantBuffer(m_vertex_shader, m_constant_buffer);
 	GraphicsEngine::get()->getImmediateDeviceContext()->setConstantBuffer(m_pixel_shader, m_constant_buffer);
 
-	/*implement the prepared shaders to graphic pipeline to be able to draw*/
+	//implement the prepared shaders to graphic pipeline to be able to draw
 	GraphicsEngine::get()->getImmediateDeviceContext()->setVertexShader(m_vertex_shader);
 	GraphicsEngine::get()->getImmediateDeviceContext()->setPixelShader(m_pixel_shader);
 
@@ -318,6 +318,45 @@ void AppWindow::onKeyDown(int key)
 	else if (key == 'A')
 	{
 		m_horizontal_move_coefficient = -1.0f;
+	}
+	else if (key == VK_ESCAPE)
+	{
+		//m_kumbara += 1;
+		m_is_running = false;
+		 
+			//// Pencere oluþtur
+			//sf::RenderWindow window(sf::VideoMode(800, 600), "Açýlýr Pencere Örneði");
+
+			//// Yazý nesnesi oluþtur
+			//sf::Font font;
+			//if (!font.loadFromFile("arial.ttf")) { 
+			//	return EXIT_FAILURE;
+			//}
+
+			//sf::Text text("", font, 24);
+			//text.setFillColor(sf::Color::Red);
+			//text.setPosition(200, 300);
+
+			//while (window.isOpen()) {
+			//	sf::Event event;
+			//	while (window.pollEvent(event)) {
+			//		if (event.type == sf::Event::Closed) {
+			//			window.close();
+			//		}
+			//	}
+
+			//	// Pencereyi temizle
+			//	window.clear();
+
+			//	// Yazýyý pencereye çiz
+			//	window.draw(text);
+
+			//	// Pencereyi göster
+			//	window.display();
+			//}
+
+			//return EXIT_SUCCESS;
+		
 	}
 }
 

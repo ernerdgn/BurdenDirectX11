@@ -60,4 +60,6 @@ private:
 	float m_horizontal_move_coefficient = .0f;  //right is positive due to the LH coord sys
 
 	Matrix4x4 m_world_cam;
+
+	//int m_kumbara = 0
 };
