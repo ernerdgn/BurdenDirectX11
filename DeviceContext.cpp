@@ -7,13 +7,15 @@
 #include "IndexBuffer.h"
 
 #include <iostream>
+#include <exception>
 
-DeviceContext::DeviceContext(ID3D11DeviceContext* device_context):m_device_context(device_context)
+DeviceContext::DeviceContext(ID3D11DeviceContext* device_context,RenderSystem* system) : m_device_context(device_context), m_system(system)
 {
 }
 
 DeviceContext::~DeviceContext()
 {
+	m_device_context->Release();
 }
 
 void DeviceContext::clearRenderTargetColor(SwapChain* swap_chain, float r, float g, float b, float a)
@@ -85,11 +87,4 @@ void DeviceContext::setVertexShader(VertexShader* vertex_shader)
 void DeviceContext::setPixelShader(PixelShader* pixel_shader)
 {
 	m_device_context->PSSetShader(pixel_shader->m_pixel_shader, nullptr, 0);
-}
-
-bool DeviceContext::release()
-{
-	m_device_context->Release();
-	delete this;
-	return true;
 }

@@ -1,25 +1,12 @@
 #include "ConstantBuffer.h"
-#include "GraphicsEngine.h"
+#include "RenderSystem.h"
 #include "DeviceContext.h"
 
 #include <iostream>
+#include <exception>
 
-ConstantBuffer::ConstantBuffer()
+ConstantBuffer::ConstantBuffer(void* buffer, UINT size_buffer, RenderSystem* system) : m_system(system)
 {
-}
-
-ConstantBuffer::~ConstantBuffer()
-{
-}
-
-bool ConstantBuffer::load(void* buffer, UINT size_buffer)
-{
-	if (m_buffer)
-	{
-		std::cout << "released m_buffer!!!!!" << std::endl;
-		m_buffer->Release();
-	}
-
 	D3D11_BUFFER_DESC buffer_desc = {};
 	buffer_desc.Usage = D3D11_USAGE_DEFAULT;
 	buffer_desc.ByteWidth = size_buffer;
@@ -30,9 +17,12 @@ bool ConstantBuffer::load(void* buffer, UINT size_buffer)
 	D3D11_SUBRESOURCE_DATA init_data = {};
 	init_data.pSysMem = buffer;
 
-	if (FAILED(GraphicsEngine::get()->m_d3d_device->CreateBuffer(&buffer_desc, &init_data, &m_buffer))) return false;
+	if (FAILED(m_system->m_d3d_device->CreateBuffer(&buffer_desc, &init_data, &m_buffer))) throw std::exception("GraphicsEngine Error (1): ConstantBuffer");
+}
 
-	return true;
+ConstantBuffer::~ConstantBuffer()
+{
+	if (m_buffer) m_buffer->Release();
 }
 
 //void ConstantBuffer::update(DeviceContext* dev_context, void* buffer)
@@ -55,11 +45,4 @@ void ConstantBuffer::update(DeviceContext* dev_context, void* buffer)
 	//	if (!dev_context->m_device_context) std::cout << "dev_context->m_device_context err!" << std::endl;
 	//	if (!m_buffer) std::cout << "m_buffer err!" << std::endl;  //error is the m_buffer
 	//}
-}
-
-bool ConstantBuffer::release()
-{
-	if (m_buffer) m_buffer->Release();
-	delete this;
-	return true;
 }
