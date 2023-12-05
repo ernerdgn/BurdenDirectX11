@@ -1,12 +1,5 @@
 #include "Window.h"
-
-Window::Window()
-{
-}
-
-Window::~Window()
-{
-}
+#include <exception>
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
@@ -15,10 +8,18 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	case WM_CREATE:
 	{
 		//starter func, will be called when window is created
-		Window* window = (Window*)((LPCREATESTRUCT)lparam)->lpCreateParams;
-		SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)window);
-		window->setHWND(hwnd);
-		window->onCreate();
+		break;
+	}
+	case WM_SETFOCUS:
+	{
+		Window* window = (Window*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
+		if (window) window->onFocus();
+		break;
+	}
+	case WM_KILLFOCUS:
+	{
+		Window* window = (Window*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
+		if (window) window->onKillFocus();
 		break;
 	}
 	case WM_DESTROY:
@@ -36,7 +37,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	return NULL;
 }
 
-bool Window::init()
+Window::Window()
 {
 	WNDCLASSEX wc;
 	wc.cbClsExtra = NULL;
@@ -52,29 +53,23 @@ bool Window::init()
 	wc.style = NULL;
 	wc.lpfnWndProc = &WndProc;
 
-	if (!::RegisterClassEx(&wc))
-		return false;
+	if (!::RegisterClassEx(&wc)) throw std::exception("Window Error (3): Window");
 
 	m_hwnd = ::CreateWindowEx(WS_EX_OVERLAPPEDWINDOW, L"WindowClass", L"Burden Engine", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT,
 		1024, 768,
-		NULL, NULL, NULL, this);
+		NULL, NULL, NULL, NULL);
 
-	if (!m_hwnd) return false;
+	if (!m_hwnd) throw std::exception("Window Error (4): Window (HWND)");
 
 	::ShowWindow(m_hwnd, SW_SHOW);
 	::UpdateWindow(m_hwnd);
 
 	//run flag
 	m_is_running = true;
-
-	return true;
 }
 
-bool Window::release()
+Window::~Window()
 {
-	if (!::DestroyWindow(m_hwnd)) return false;
-
-	return true;
 }
 
 RECT Window::getClientWindowRect()
@@ -82,11 +77,6 @@ RECT Window::getClientWindowRect()
 	RECT rc;
 	::GetClientRect(this->m_hwnd, &rc);
 	return rc;
-}
-
-void Window::setHWND(HWND hwnd)
-{
-	this->m_hwnd = hwnd;
 }
 
 void Window::onCreate()
@@ -102,9 +92,24 @@ void Window::onDestroy()
 	m_is_running = false;
 }
 
+void Window::onFocus()
+{
+}
+
+void Window::onKillFocus()
+{
+}
+
 bool Window::broadcast()
 {
 	MSG msg;
+
+	if (!this->is_initialized)
+	{
+		SetWindowLongPtr(m_hwnd, GWLP_USERDATA, (LONG_PTR)this);
+		this->onCreate();
+		this->is_initialized = true;
+	}
 	
 	this->onUpdate();
 	
@@ -121,5 +126,6 @@ bool Window::broadcast()
 
 bool Window::is_running()
 {
+	if (m_is_running) broadcast();
 	return m_is_running;
 }

@@ -7,10 +7,10 @@
 
 class InputSystem
 {
-public:
 	InputSystem();
 	~InputSystem();
 
+public:
 	void update();
 	void addListener(InputListener* listener);
 	void removeListener(InputListener* listener);
@@ -20,6 +20,8 @@ public:
 	void showCursor(bool flag);
 
 	static InputSystem* get();
+	static void create();
+	static void release();
 
 private:
 	//std::map<InputListener*, InputListener*> m_map_listeners;
@@ -33,5 +35,7 @@ private:
 	bool m_first_time_moved = true;  // cheks the update method's first call
 	Point m_old_mouse_position;
 
+	/* system */
+	static InputSystem* m_system;
 };
 

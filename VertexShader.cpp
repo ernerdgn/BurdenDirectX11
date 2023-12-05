@@ -11,4 +11,3 @@ VertexShader::~VertexShader()
 {
 	m_vertex_shader->Release();
 }
-

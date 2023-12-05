@@ -1,25 +1,21 @@
 #include "GraphicsEngine.h"
+#include <exception>
+
+GraphicsEngine* GraphicsEngine::m_engine = nullptr;
 
 GraphicsEngine::GraphicsEngine()
-{
+{	
+	try
+	{
+		m_render_system = new RenderSystem();
+	}
+	catch (...) { throw std::exception("GraphicsEngine Error (1): GraphicsEngine"); }
 }
 
 GraphicsEngine::~GraphicsEngine()
 {
-}
-
-bool GraphicsEngine::init()
-{
-	m_render_system = new RenderSystem();
-	m_render_system->init();
-	return true;
-}
-
-bool GraphicsEngine::release()
-{
-	m_render_system->release();
 	delete m_render_system;
-	return true;
+	GraphicsEngine::m_engine = nullptr;
 }
 
 RenderSystem* GraphicsEngine::getRenderSystem()
@@ -30,6 +26,17 @@ RenderSystem* GraphicsEngine::getRenderSystem()
 
 GraphicsEngine* GraphicsEngine::get()
 {
-	static GraphicsEngine engine;
-	return &engine;
+	return m_engine;
+}
+
+void GraphicsEngine::create()
+{
+	if (GraphicsEngine::m_engine) throw std::exception("GraphicsEngine Error (2): GraphicsEngine");
+	GraphicsEngine::m_engine = new GraphicsEngine();
+}
+
+void GraphicsEngine::release()
+{
+	if (!GraphicsEngine::m_engine) return;
+	delete GraphicsEngine::m_engine;
 }

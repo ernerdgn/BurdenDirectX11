@@ -22,6 +22,8 @@ public:
 	virtual void onCreate() override;
 	virtual void onUpdate() override;
 	virtual void onDestroy() override;
+	virtual void onFocus() override;
+	virtual void onKillFocus() override;
 
 	//inheritence from inputListener
 	virtual void onKeyDown(int key) override;
@@ -33,12 +35,12 @@ public:
 	virtual void onRightMouseButtonUp(const Point& mouse_position) override;
 
 private:
-	SwapChain* m_swap_chain;
-	VertexBuffer* m_vertex_buffer;
-	VertexShader* m_vertex_shader;
-	PixelShader* m_pixel_shader;
-	ConstantBuffer* m_constant_buffer;
-	IndexBuffer* m_index_buffer;
+	SwapChainPtr m_swap_chain;
+	VertexBufferPtr m_vertex_buffer;
+	VertexShaderPtr m_vertex_shader;
+	PixelShaderPtr m_pixel_shader;
+	ConstantBufferPtr m_constant_buffer;
+	IndexBufferPtr m_index_buffer;
 
 	long m_old_delta;
 	long m_new_delta;

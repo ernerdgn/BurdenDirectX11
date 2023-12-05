@@ -2,12 +2,15 @@
 #include <Windows.h>
 #include <iostream>
 
+InputSystem* InputSystem::m_system = nullptr;
+
 InputSystem::InputSystem()
 {
 }
 
 InputSystem::~InputSystem()
 {
+	InputSystem::m_system = nullptr;
 }
 
 void InputSystem::update()
@@ -126,4 +129,16 @@ InputSystem* InputSystem::get()
 {
 	static InputSystem input_system;
 	return &input_system;
+}
+
+void InputSystem::create()
+{
+	if (InputSystem::m_system) throw std::exception("InputSystem Error (2): InputSystem");
+	InputSystem::m_system = new InputSystem();
+}
+
+void InputSystem::release()
+{
+	if (!InputSystem::m_system) return;
+	delete InputSystem::m_system;
 }

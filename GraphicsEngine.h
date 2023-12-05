@@ -6,26 +6,29 @@
 
 class GraphicsEngine
 {
-public:
 	GraphicsEngine();
 	~GraphicsEngine();
 
-	bool init();
-	bool release();
-
+public:
 	RenderSystem* getRenderSystem();
 
 	static GraphicsEngine* get();
+	static void create();
+	static void release();
 
 private:
 	RenderSystem* m_render_system = nullptr;
+	static GraphicsEngine* m_engine;
 };
 
 
 /*
 error code map
-GraphicsEngineErrors
-(1) - creation error
+
+(1) - graphicsEngine (component) creation error
+(2) - already exists
+(3) - window registeration
+(4) - window (component) creation error
 
 
 

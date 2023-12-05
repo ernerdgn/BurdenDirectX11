@@ -7,11 +7,6 @@
 #include <iostream>
 #include <chrono>
 
-//struct vec3
-//{
-//	float x, y, z;
-//};
-
 struct vertex
 {
 	Vector3D pos;
@@ -122,10 +117,8 @@ void AppWindow::onCreate()
 	Window::onCreate();
 
 	InputSystem::get()->addListener(this);
-
 	InputSystem::get()->showCursor(false);
 
-	GraphicsEngine::get()->init();
 	RECT rc = this->getClientWindowRect();
 	m_swap_chain = GraphicsEngine::get()->getRenderSystem()->createSwapChain(this->m_hwnd, rc.right - rc.left, rc.bottom - rc.top);
 
@@ -274,15 +267,21 @@ void AppWindow::onUpdate()
 	m_new_delta = ::GetTickCount();
 	//Sleep(1);
 	m_delta_time = (m_old_delta) ? ((m_new_delta - m_old_delta) / 1000.0f) : 0;
-	//if (m_delta_time == 0) counter++;
-	//else counter = 0;
-	//std::cout << "RATE: " << counter << std::endl;
 }
 
 void AppWindow::onDestroy()
 {
 	Window::onDestroy();
-	GraphicsEngine::get()->release();
+}
+
+void AppWindow::onFocus()
+{
+	InputSystem::get()->addListener(this);
+}
+
+void AppWindow::onKillFocus()
+{
+	InputSystem::get()->removeListener(this);
 }
 
 void AppWindow::onKeyDown(int key)
@@ -312,40 +311,6 @@ void AppWindow::onKeyDown(int key)
 	{
 		//m_kumbara += 1;
 		m_is_running = false;
-		 
-			//// Pencere oluþtur
-			//sf::RenderWindow window(sf::VideoMode(800, 600), "Açýlýr Pencere Örneði");
-
-			//// Yazý nesnesi oluþtur
-			//sf::Font font;
-			//if (!font.loadFromFile("arial.ttf")) { 
-			//	return EXIT_FAILURE;
-			//}
-
-			//sf::Text text("", font, 24);
-			//text.setFillColor(sf::Color::Red);
-			//text.setPosition(200, 300);
-
-			//while (window.isOpen()) {
-			//	sf::Event event;
-			//	while (window.pollEvent(event)) {
-			//		if (event.type == sf::Event::Closed) {
-			//			window.close();
-			//		}
-			//	}
-
-			//	// Pencereyi temizle
-			//	window.clear();
-
-			//	// Yazýyý pencereye çiz
-			//	window.draw(text);
-
-			//	// Pencereyi göster
-			//	window.display();
-			//}
-
-			//return EXIT_SUCCESS;
-		
 	}
 }
 

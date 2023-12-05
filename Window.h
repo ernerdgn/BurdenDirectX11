@@ -8,20 +8,22 @@ public:
 	Window();
 	~Window();
 
-	bool init();
-	bool broadcast();
 	bool is_running();
-	bool release();
 
 	RECT getClientWindowRect();
-	void setHWND(HWND hwnd);
 
-	virtual void onCreate() = 0;
-	virtual void onUpdate() = 0;
+	virtual void onCreate();
+	virtual void onUpdate();
 	virtual void onDestroy();
+	virtual void onFocus();
+	virtual void onKillFocus();
+	
+private:
+	bool broadcast();
 
 protected:
 	HWND m_hwnd;
 	bool m_is_running;
+	bool is_initialized = false;
 };
 
