@@ -4,6 +4,7 @@
 #include "Prerequisites.h"
 #include "RenderSystem.h"
 #include "TextureManager.h"
+#include "MeshManager.h"
 
 class GraphicsEngine
 {
@@ -13,6 +14,8 @@ class GraphicsEngine
 public:
 	RenderSystem* getRenderSystem();
 	TextureManager* getTextureManager();
+	MeshManager* getMeshManager();
+	void getVMLOUTShaderByteCodeSize(void** byte_code, size_t* size);
 
 	static GraphicsEngine* get();
 	static void create();
@@ -21,7 +24,12 @@ public:
 private:
 	RenderSystem* m_render_system = nullptr;
 	TextureManager* m_texture_manager = nullptr;
+	MeshManager* m_mesh_manager = nullptr;
 	static GraphicsEngine* m_engine;
+
+	unsigned char m_mesh_layout_byte_code[1024];
+	size_t m_mesh_layout_size = 0;
+
 };
 
 
@@ -34,6 +42,7 @@ error code map
 (4) - window (component) creation error
 (5) - resourceManager (component) creation error
 (6) - textureManager creating texture from file failed
+(7) - obj load is failed / not loaded succesfully
 
 
 

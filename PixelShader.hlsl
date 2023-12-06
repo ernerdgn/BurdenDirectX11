@@ -20,5 +20,5 @@ float4 psmain(PIXEL_SHADER_INPUT input) : SV_TARGET
 {
     //float r = 1.0f, g = 1.0f, b = 1.0f, alpha = 1.0f;
     float alpha = 1.0f;
-    return Texture.Sample(TextureSampler, input.texcoord);
+    return Texture.Sample(TextureSampler, input.texcoord * 0.5f);
 }

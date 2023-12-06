@@ -36,6 +36,28 @@ SwapChain::SwapChain(HWND hwnd, UINT width, UINT height, RenderSystem* system) :
 	buffer->Release();
 
 	if (FAILED(hr)) throw std::exception("GraphicsEngine Error (1): SwapChain");
+
+	D3D11_TEXTURE2D_DESC texture_desc = {};
+	texture_desc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	texture_desc.Width = width;
+	texture_desc.Height = height;
+	texture_desc.Usage = D3D11_USAGE_DEFAULT;
+	texture_desc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+	texture_desc.MipLevels = 1;
+	texture_desc.SampleDesc.Count = 1;
+	texture_desc.SampleDesc.Quality = 0;
+	texture_desc.MiscFlags = 0;
+	texture_desc.ArraySize = 1;
+	texture_desc.CPUAccessFlags = 0;
+
+	hr = device->CreateTexture2D(&texture_desc, nullptr, &buffer);
+
+	if (FAILED(hr)) throw std::exception("GraphicsEngine Error (1): SwapChain");
+
+	hr = device->CreateDepthStencilView(buffer, NULL, &m_dsv);
+	buffer->Release();
+
+	if (FAILED(hr)) throw std::exception("GraphicsEngine Error (1): SwapChain");
 }
 
 SwapChain::~SwapChain()

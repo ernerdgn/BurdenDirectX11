@@ -14,6 +14,8 @@ class ResourceManager;
 class Resource;
 class TextureManager;
 class Texture;
+class MeshManager;
+class Mesh;
 
 typedef std::shared_ptr<SwapChain> SwapChainPtr;
 typedef std::shared_ptr<VertexBuffer> VertexBufferPtr;
@@ -24,3 +26,4 @@ typedef std::shared_ptr<PixelShader> PixelShaderPtr;
 typedef std::shared_ptr<ConstantBuffer> ConstantBufferPtr;
 typedef std::shared_ptr<Resource> ResourcePtr;
 typedef std::shared_ptr<Texture> TexturePtr;
+typedef std::shared_ptr<Mesh> MeshPtr;

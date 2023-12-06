@@ -2,12 +2,12 @@
 #include "ResourceManager.h"
 #include <exception>
 
-class TextureManager : public ResourceManager
+class MeshManager : public ResourceManager
 {
 public:
-	TextureManager();
-	~TextureManager();
-	TexturePtr createTextureFromFile(const wchar_t* file_path);
+	MeshManager();
+	~MeshManager();
+	MeshPtr createMeshFromFile(const wchar_t* file_path);
 
 	//inherited via ResourceManager
 	virtual Resource* createResourceFromFileConcrete(const wchar_t* file_path);
