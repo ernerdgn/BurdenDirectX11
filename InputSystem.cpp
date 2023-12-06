@@ -127,8 +127,7 @@ void InputSystem::showCursor(bool flag)
 
 InputSystem* InputSystem::get()
 {
-	static InputSystem input_system;
-	return &input_system;
+	return m_system;
 }
 
 void InputSystem::create()

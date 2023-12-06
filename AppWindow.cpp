@@ -1,5 +1,6 @@
 #include "AppWindow.h"
 #include "Vector3D.h"
+#include "Vector2D.h"
 #include "Matrix4x4.h"
 #include "InputSystem.h"
 
@@ -10,9 +11,7 @@
 struct vertex
 {
 	Vector3D pos;
-	//Vector3D pos1;
-	Vector3D color;
-	Vector3D color1;
+	Vector2D texcoord;
 };
 
 __declspec(align(16))  //16 bytes alignation
@@ -119,6 +118,8 @@ void AppWindow::onCreate()
 	InputSystem::get()->addListener(this);
 	InputSystem::get()->showCursor(false);
 
+	m_wooden_crate_text = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\wood.jpg");
+
 	RECT rc = this->getClientWindowRect();
 	m_swap_chain = GraphicsEngine::get()->getRenderSystem()->createSwapChain(this->m_hwnd, rc.right - rc.left, rc.bottom - rc.top);
 
@@ -126,39 +127,63 @@ void AppWindow::onCreate()
 	//cam
 	m_world_cam.setTranslationMatrix(Vector3D(0, 0, -2));
 
-	//vertex list[] = {  //for triangle list
-	//	{-.5f, -.5f, .0f},  //pos1
-	//	{.0f, .5f, .0f},  //pos2
-	//	{.5f, -.5f, .0f},  //pos3
-	//};
+	Vector3D position_list[] = {
+		/* FRONT */
+		{Vector3D(-.5f, -.5f, -.5f)},
+		{Vector3D(-.5f, .5f, -.5f)},
+		{Vector3D(.5f, .5f, -.5f)},
+		{Vector3D(.5f, -.5f, -.5f)},
 
-	vertex vertex_list[] = {  //for triangle strip
-			//(vec3)pos_1,					(vec3)pos1_1,					(vec3)color_1			(vec3)color1_1
-			//(vec3)pos_2,					(vec3)pos1_2,					(vec3)color_2			(vec3)color1_2
-			//(vec3)pos_3,					(vec3)pos1_3,					(vec3)color_3			(vec3)color1_3
-			//(vec3)pos_4,					(vec3)pos1_4,					(vec3)color_4			(vec3)color1_4
-			//{Vector3D(-.5f, -.5f, .0f),	Vector3D(-.32f, -.11f, .0f),	Vector3D(0, 0, 1),		Vector3D(1, 1, 0)},
-			//{Vector3D(-.5f, .5f, .0f),	Vector3D(-.11f, .78f, .0f),		Vector3D(0, 1, 0),		Vector3D(1, 0, 1)},
-			//{Vector3D(.5f, -.5f, .0f),	Vector3D(.75f, -.73f, .0f),		Vector3D(1, 0, 0),		Vector3D(1, 1, 0)},
-			//{Vector3D(.5f, .5f, .0f),	    Vector3D(.88f, .77f, .0f),		Vector3D(0, 1, 1),		Vector3D(1, 0, 0)}
+		/* BEHIND */
+		{Vector3D(.5f, -.5f, .5f)},
+		{Vector3D(.5f, .5f, .5f)},
+		{Vector3D(-.5f, .5f, .5f)},
+		{Vector3D(-.5f, -.5f, .5f)}
+	};
 
-			// DATA STRUCT
-			//(vec3)pos_1,					(vec3)color_1			(vec3)color1_1
-			//(vec3)pos_2,					(vec3)color_2			(vec3)color1_2
-			//(vec3)pos_3,					(vec3)color_3			(vec3)color1_3
-			//(vec3)pos_4,					(vec3)color_4			(vec3)color1_4
+	Vector2D texcoord_list[] = {
+		{Vector2D(.0f, .0f)},
+		{Vector2D(.0f, 1.0f)},
+		{Vector2D(1.0f, .0f)},
+		{Vector2D(1.0f, 1.0f)},
+	};
 
-			/* FRONT */
-			{Vector3D(-.5f, -.5f, -.5f),	Vector3D(0, 0, 1),		Vector3D(1, 1, 0)},
-			{Vector3D(-.5f, .5f, -.5f),		Vector3D(0, 1, 0),		Vector3D(1, 0, 1)},
-			{Vector3D(.5f, .5f, -.5f),		Vector3D(1, 0, 0),		Vector3D(1, 1, 0)},
-			{Vector3D(.5f, -.5f, -.5f),		Vector3D(0, 1, 1),		Vector3D(1, 0, 0)},
+	vertex vertex_list[] = {
+		/* front */
+		{ position_list[0], texcoord_list[1] },
+		{ position_list[1], texcoord_list[0] },
+		{ position_list[2], texcoord_list[2] },
+		{ position_list[3], texcoord_list[3] },
 
-			/* BEHIND */
-			{Vector3D(.5f, -.5f, .5f),		Vector3D(1, 0, 0),		Vector3D(0, 1, 1)},
-			{Vector3D(.5f, .5f, .5f),		Vector3D(0, 1, 0),		Vector3D(0, 1, 0)},
-			{Vector3D(-.5f, .5f, .5f),		Vector3D(0, 0, 1),		Vector3D(0, 1, 1)},
-			{Vector3D(-.5f, -.5f, .5f),		Vector3D(1, 1, 0),		Vector3D(0, 0, 1)}
+		/* behind */
+		{ position_list[4], texcoord_list[1] },
+		{ position_list[5], texcoord_list[0] },
+		{ position_list[6], texcoord_list[2] },
+		{ position_list[7], texcoord_list[3] },
+
+		/* top */
+		{ position_list[1], texcoord_list[1] },
+		{ position_list[6], texcoord_list[0] },
+		{ position_list[5], texcoord_list[2] },
+		{ position_list[2], texcoord_list[3] },
+
+		/* bottom */
+		{ position_list[7], texcoord_list[1] },
+		{ position_list[0], texcoord_list[0] },
+		{ position_list[3], texcoord_list[2] },
+		{ position_list[4], texcoord_list[3] },
+
+		/* right */
+		{ position_list[3], texcoord_list[1] },
+		{ position_list[2], texcoord_list[0] },
+		{ position_list[5], texcoord_list[2] },
+		{ position_list[4], texcoord_list[3] },
+
+		/* left */
+		{ position_list[7], texcoord_list[1] },
+		{ position_list[6], texcoord_list[0] },
+		{ position_list[1], texcoord_list[2] },
+		{ position_list[0], texcoord_list[3] },
 	};
 
 	UINT size_list = ARRAYSIZE(vertex_list);
@@ -173,20 +198,20 @@ void AppWindow::onCreate()
 		6, 7, 4,  // 2nd triangle
 
 		/* TOP */
-		1, 6, 5,  // 1st triangle
-		5, 2, 1,  // 2nd triangle
+		8, 9, 10,  // 1st triangle
+		10, 11, 8,  // 2nd triangle
 
 		/* BOTTOM */
-		7, 0, 3,  // 1st triangle
-		3, 4, 7,  // 2nd triangle
+		12, 13, 14,  // 1st triangle
+		14, 15, 12,  // 2nd triangle
 
 		/* RIGHT */
-		3, 2, 5,  // 1st triangle
-		5, 4, 3,  // 2nd triangle
+		16, 17, 18,  // 1st triangle
+		18, 19, 16,  // 2nd triangle
 
 		/* LEFT */
-		7, 6, 1,  // 1st triangle
-		1, 0, 7,  // 2nd triangle
+		20, 21, 22,  // 1st triangle
+		22, 23, 20  // 2nd triangle
 	};
 
 	UINT size_index_list = ARRAYSIZE(index_list);
@@ -247,6 +272,8 @@ void AppWindow::onUpdate()
 	//implement the prepared shaders to graphic pipeline to be able to draw
 	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setVertexShader(m_vertex_shader);
 	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setPixelShader(m_pixel_shader);
+
+	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setTexture(m_pixel_shader, m_wooden_crate_text);
 
 	//set the vertices of the object to draw
 	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setVertexBuffer(m_vertex_buffer);

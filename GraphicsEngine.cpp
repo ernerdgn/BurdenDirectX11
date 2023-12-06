@@ -9,18 +9,30 @@ GraphicsEngine::GraphicsEngine()
 	{
 		m_render_system = new RenderSystem();
 	}
-	catch (...) { throw std::exception("GraphicsEngine Error (1): GraphicsEngine"); }
+	catch (...) { throw std::exception("GraphicsEngine Error (1): GraphicsEngine (RenderSystem)"); }
+
+	try
+	{
+		m_texture_manager = new TextureManager();
+	}
+	catch (...) { throw std::exception("GraphicsEngine Error (1): GraphicsEngine (TextureManager)"); }
 }
 
 GraphicsEngine::~GraphicsEngine()
 {
-	delete m_render_system;
 	GraphicsEngine::m_engine = nullptr;
+	delete m_texture_manager;
+	delete m_render_system;
 }
 
 RenderSystem* GraphicsEngine::getRenderSystem()
 {
 	return m_render_system;
+}
+
+TextureManager* GraphicsEngine::getTextureManager()
+{
+	return m_texture_manager;
 }
 
 

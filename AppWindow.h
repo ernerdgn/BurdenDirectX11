@@ -41,6 +41,7 @@ private:
 	PixelShaderPtr m_pixel_shader;
 	ConstantBufferPtr m_constant_buffer;
 	IndexBufferPtr m_index_buffer;
+	TexturePtr m_wooden_crate_text;
 
 	long m_old_delta;
 	long m_new_delta;

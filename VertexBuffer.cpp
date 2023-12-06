@@ -30,35 +30,15 @@ VertexBuffer::VertexBuffer(void* list_vertices, UINT size_vertex, UINT size_list
 			0  //instance data step rate
 		},
 
-		//{
-		//	"POSITION",  //semantic name
-		//	1,  //semantic index
-		//	DXGI_FORMAT_R32G32B32_FLOAT,  //format
-		//	0,  //input slot
-		//	12,  //aligned byte offset
-		//	D3D11_INPUT_PER_VERTEX_DATA,  //input slot class
-		//	0  //instance data step rate
-		//},
-
 		{
-			"COLOR",  //semantic name
+			"TEXCOORD",  //semantic name
 			0,  //semantic index
-			DXGI_FORMAT_R32G32B32_FLOAT,  //format
+			DXGI_FORMAT_R32G32_FLOAT,  //format
 			0,  //input slot
 			12,  //aligned byte offset
 			D3D11_INPUT_PER_VERTEX_DATA,  //input slot class
 			0  //instance data step rate
 		},
-
-		{
-			"COLOR",  //semantic name
-			1,  //semantic index
-			DXGI_FORMAT_R32G32B32_FLOAT,  //format
-			0,  //input slot
-			24,  //aligned byte offset
-			D3D11_INPUT_PER_VERTEX_DATA,  //input slot class
-			0  //instance data step rate
-		}
 	};
 
 	UINT size_layout = ARRAYSIZE(layout);

@@ -1,15 +1,13 @@
 struct VERTEX_SHADER_INPUT
 {
-    float4 pos : POSITION;
-    float3 color : COLOR;
-    float3 color1 : COLOR1;
+    float4 pos : POSITION0;
+    float2 texcoord : TEXCOORD0;
 };
 
 struct VERTEX_SHADER_OUTPUT
 {
     float4 pos : SV_POSITION;
-    float3 color : COLOR;
-    float3 color1 : COLOR1;
+    float2 texcoord : TEXCOORD0;
 };
 
 cbuffer constant : register(b0)
@@ -34,8 +32,7 @@ VERTEX_SHADER_OUTPUT vsmain(VERTEX_SHADER_INPUT input)
     /* PROJECTION SPACE */
     output.pos = mul(output.pos, m_projection);
     
-    output.color = input.color;
-    output.color1 = input.color1;
+    output.texcoord = input.texcoord;
 	
     return output;
 }
