@@ -39,6 +39,16 @@ VertexBuffer::VertexBuffer(void* list_vertices, UINT size_vertex, UINT size_list
 			D3D11_INPUT_PER_VERTEX_DATA,  //input slot class
 			0  //instance data step rate
 		},
+
+		{
+			"NORMAL",  //semantic name
+			0,  //semantic index
+			DXGI_FORMAT_R32G32B32_FLOAT,  //format
+			0,  //input slot
+			20,  //aligned byte offset
+			D3D11_INPUT_PER_VERTEX_DATA,  //input slot class
+			0  //instance data step rate
+		}
 	};
 
 	UINT size_layout = ARRAYSIZE(layout);

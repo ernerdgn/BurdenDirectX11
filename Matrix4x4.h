@@ -8,13 +8,11 @@ class Matrix4x4
 public:
 	Matrix4x4()
 	{
-
 	}
 
 	void setIdentityMatrix()
 	{
 		::memset(m_matrix, 0, sizeof(float) * 16);  //fill with 0s
-		//for (int i = 0; i <= 3; i++) m_matrix[i][i] = 1;
 		m_matrix[0][0] = 1;
 		m_matrix[1][1] = 1;
 		m_matrix[2][2] = 1;
@@ -23,8 +21,6 @@ public:
 
 	void setTranslationMatrix(const Vector3D& translation)
 	{
-		//setIdentityMatrix();
-
 		m_matrix[3][0] = translation.m_x;
 		m_matrix[3][1] = translation.m_y;
 		m_matrix[3][2] = translation.m_z;
@@ -32,8 +28,6 @@ public:
 
 	void setScaleMatrix(const Vector3D& scale)
 	{
-		//setIdentityMatrix();
-
 		m_matrix[0][0] = scale.m_x;
 		m_matrix[1][1] = scale.m_y;
 		m_matrix[2][2] = scale.m_z;
@@ -173,7 +167,6 @@ public:
 
 	~Matrix4x4()
 	{
-
 	}
 
 	float m_matrix[4][4] = {};

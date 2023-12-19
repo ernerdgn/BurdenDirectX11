@@ -64,7 +64,12 @@ Mesh::Mesh(const wchar_t* file_path) : Resource(file_path)
 				tinyobj::real_t tX = attributes.texcoords[index.texcoord_index * 2 + 0];
 				tinyobj::real_t tY = attributes.texcoords[index.texcoord_index * 2 + 1];
 
-				VertexMesh vertex_m(Vector3D(vX, vY, vZ), Vector2D(tX, tY));
+				// normals
+				tinyobj::real_t nX = attributes.normals[index.normal_index * 3 + 0];
+				tinyobj::real_t nY = attributes.normals[index.normal_index * 3 + 1];
+				tinyobj::real_t nZ = attributes.normals[index.normal_index * 3 + 2];
+
+				VertexMesh vertex_m(Vector3D(vX, vY, vZ), Vector2D(tX, tY), Vector3D(nX, nY, nZ));
 				vertices_list.push_back(vertex_m);
 
 				indices_list.push_back(index_offset + vertex);

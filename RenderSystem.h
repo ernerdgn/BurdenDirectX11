@@ -21,8 +21,12 @@ public:
 
 	bool compileVertexShader(const wchar_t* file_name, const char* entry_point_name, void** shader_byte_code, size_t* shader_byte_code_size);
 	bool compilePixelShader(const wchar_t* file_name, const char* entry_point_name, void** shader_byte_code, size_t* shader_byte_code_size);
+	
+	void setRasterizerState(bool cull_front_flag);
 
 private:
+	void initRasterizerState();
+
 	ID3D11Device* m_d3d_device;
 	D3D_FEATURE_LEVEL m_feature_level;
 
@@ -38,6 +42,9 @@ private:
 	IDXGIAdapter* m_dxgi_adapter;
 	IDXGIFactory* m_dxgi_factory;
 	ID3D11DeviceContext* m_imm_context;
+
+	ID3D11RasterizerState* m_rasterizer_cull_front_state = nullptr;
+	ID3D11RasterizerState* m_rasterizer_cull_back_state = nullptr;
 
 
 	friend class SwapChain;
