@@ -1,14 +1,12 @@
 #include "AppWindow.h"
-#include "Vector3D.h"
 #include "Vector2D.h"
-#include "Vector4D.h"
+#include "Vector3D.h"
 #include "Matrix4x4.h"
 #include "InputSystem.h"
 #include "Mesh.h"
 
 #include <Windows.h>
 #include <iostream>
-#include <chrono>
 
 struct vertex
 {
@@ -19,8 +17,8 @@ struct vertex
 __declspec(align(16))  //16 bytes alignation
 struct constant
 {
-	Matrix4x4 m_view;
 	Matrix4x4 m_world;
+	Matrix4x4 m_view;
 	Matrix4x4 m_projection;
 	Vector4D m_light_direction;
 	Vector4D m_cam_position;
@@ -67,12 +65,12 @@ void AppWindow::updateCamera()
 	int width = this->getClientWindowRect().right - this->getClientWindowRect().left;
 	int height = this->getClientWindowRect().bottom - this->getClientWindowRect().top;
 
-	m_projection_cam.setPerspectiveFovLH(1.57079632f, ((float)width / (float)height), .1f, 1000.0f);
+	m_projection_cam.setPerspectiveFovLH(1.57f, ((float)width / (float)height), .1f, 100.0f);
 }
 
 void AppWindow::updateModel()
 {
-	constant const_obj;
+	constant model_constant;
 	Matrix4x4 m_light_rotation_matrix;
 
 	m_light_rotation_matrix.setIdentityMatrix();
@@ -80,26 +78,26 @@ void AppWindow::updateModel()
 
 	m_light_rotation_y += .785f * m_delta_time;  // pi / 4 * delta_t
 
-	const_obj.m_world.setIdentityMatrix();
-	const_obj.m_view = m_view_cam;
-	const_obj.m_projection = m_projection_cam;
-	const_obj.m_cam_position = m_world_cam.getTranslation();
-	const_obj.m_light_direction = m_light_rotation_matrix.getZDirection();
+	model_constant.m_world.setIdentityMatrix();
+	model_constant.m_view = m_view_cam;
+	model_constant.m_projection = m_projection_cam;
+	model_constant.m_cam_position = m_world_cam.getTranslation();
+	model_constant.m_light_direction = m_light_rotation_matrix.getZDirection();
 
-	m_constant_buffer->update(GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext(), &const_obj);  //constant buffer updating
+	m_constant_buffer->update(GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext(), &model_constant);  //constant buffer updating
 }
 
 void AppWindow::updateSkybox()
 {
-	constant const_obj;
+	constant skybox_constant;
 
-	const_obj.m_world.setIdentityMatrix();
-	const_obj.m_world.setScaleMatrix(Vector3D(100.0f, 100.0f, 100.0f));
-	const_obj.m_world.setTranslationMatrix(m_world_cam.getTranslation());
-	const_obj.m_view = m_view_cam;
-	const_obj.m_projection = m_projection_cam;
+	skybox_constant.m_world.setIdentityMatrix();
+	skybox_constant.m_world.setScaleMatrix(Vector3D(100.0f, 100.0f, 100.0f));
+	skybox_constant.m_world.setTranslationMatrix(m_world_cam.getTranslation());
+	skybox_constant.m_view = m_view_cam;
+	skybox_constant.m_projection = m_projection_cam;
 
-	m_skybox_constant_buffer->update(GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext(), &const_obj);  //constant buffer updating
+	m_skybox_constant_buffer->update(GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext(), &skybox_constant);  //constant buffer updating
 }
 
 void AppWindow::drawMesh(const MeshPtr& mesh, const VertexShaderPtr& vertex_shader, const PixelShaderPtr& pixel_shader, const ConstantBufferPtr& constant_buffer, const TexturePtr& texture)
@@ -178,10 +176,10 @@ void AppWindow::onUpdate()
 
 	InputSystem::get()->update();
 
-	/*clearing the render target*/
+	/* clearing the render target */
 	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->clearRenderTargetColor(this->m_swap_chain, .25f, .25f, .25f, 1);  //0.125f, 0.025f, 0.125f
 
-	/*set viewport of render target (which to draw)*/
+	/* set viewport of render target (which to draw) */
 	RECT rc = this->getClientWindowRect();
 	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setViewportSize(rc.right - rc.left, rc.bottom - rc.top);
 
@@ -197,13 +195,10 @@ void AppWindow::onUpdate()
 	GraphicsEngine::get()->getRenderSystem()->setRasterizerState(true);
 	drawMesh(m_skybox_mesh, m_vertex_shader, m_skybox_shader, m_skybox_constant_buffer, m_texture_skybox);
 
-
 	m_swap_chain->present(false);
 
-	
 	m_old_delta = m_new_delta;
 	m_new_delta = ::GetTickCount();
-	//Sleep(1);
 	m_delta_time = (m_old_delta) ? ((m_new_delta - m_old_delta) / 1000.0f) : 0;
 }
 
