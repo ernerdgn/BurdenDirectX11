@@ -22,6 +22,8 @@ public:
 	void updateCamera();
 	void updateSkybox();
 
+	void render();
+
 	void drawMesh(const MeshPtr& mesh, const VertexShaderPtr& vertex_shader, const PixelShaderPtr& pixel_shader, const ConstantBufferPtr& constant_buffer, const TexturePtr& texture);
 
 	//inheritence from window
@@ -30,6 +32,7 @@ public:
 	virtual void onDestroy() override;
 	virtual void onFocus() override;
 	virtual void onKillFocus() override;
+	virtual void onSize() override;
 
 	//inheritence from inputListener
 	virtual void onKeyDown(int key) override;
@@ -58,28 +61,36 @@ private:
 	MeshPtr m_mesh;
 	MeshPtr m_skybox_mesh;
 
+	//elapsed time calculation
 	long m_old_delta;
 	long m_new_delta;
 	float m_delta_time;
 
+	//position and scale changes
 	float m_delta_pos;
 	float m_delta_scale;
 
+	//rotation coefficients
 	float m_rotation_x = .0f;
 	float m_rotation_y = .0f;
 
+	//light
 	float m_light_rotation_y = .0f;
 
+	//mouse button flags
 	bool is_pressed_left = false;
 	bool is_pressed_right = false;
-
-	float m_scale_with_tick = 1;
 
 	//cam
 	float m_forward = .0f;
 	float m_horizontal_move_coefficient = .0f;  //right is positive due to the LH coord sys
 
+	//world-view-porjection matrices
 	Matrix4x4 m_world_cam;
 	Matrix4x4 m_view_cam;
 	Matrix4x4 m_projection_cam;
+
+	//state flags
+	bool m_resize_state = false;
+	bool m_fullscreen_flag = false;
 };

@@ -11,12 +11,14 @@ public:
 	bool is_running();
 
 	RECT getClientWindowRect();
+	RECT getScreenSize();
 
 	virtual void onCreate();
 	virtual void onUpdate();
 	virtual void onDestroy();
 	virtual void onFocus();
 	virtual void onKillFocus();
+	virtual void onSize();
 	
 private:
 	bool broadcast();

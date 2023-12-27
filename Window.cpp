@@ -10,6 +10,13 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 		//starter func, will be called when window is created
 		break;
 	}
+	case WM_SIZE:
+	{
+		//will be called when window is resized
+		Window* window = (Window*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
+		if (window) window->onSize();
+		break;
+	}
 	case WM_SETFOCUS:
 	{
 		Window* window = (Window*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
@@ -19,7 +26,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	case WM_KILLFOCUS:
 	{
 		Window* window = (Window*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
-		if (window) window->onKillFocus();
+		window->onKillFocus();
 		break;
 	}
 	case WM_DESTROY:
@@ -79,6 +86,16 @@ RECT Window::getClientWindowRect()
 	return rc;
 }
 
+RECT Window::getScreenSize()
+{
+	RECT rc;
+
+	rc.right = ::GetSystemMetrics(SM_CXSCREEN);
+	rc.bottom = ::GetSystemMetrics(SM_CYSCREEN);
+
+	return rc;
+}
+
 void Window::onCreate()
 {
 }
@@ -98,6 +115,11 @@ void Window::onFocus()
 
 void Window::onKillFocus()
 {
+}
+
+void Window::onSize()
+{
+
 }
 
 bool Window::broadcast()

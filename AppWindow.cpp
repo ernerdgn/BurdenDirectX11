@@ -100,6 +100,34 @@ void AppWindow::updateSkybox()
 	m_skybox_constant_buffer->update(GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext(), &skybox_constant);  //constant buffer updating
 }
 
+void AppWindow::render()
+{
+	/* clearing the render target */
+	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->clearRenderTargetColor(this->m_swap_chain, .25f, .25f, .25f, 1);  //0.125f, 0.025f, 0.125f
+
+	/* set viewport of render target (which to draw) */
+	RECT rc = this->getClientWindowRect();
+	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setViewportSize(rc.right - rc.left, rc.bottom - rc.top);
+
+	/* constant buffer updates */
+	// flag update
+	update();
+
+	//rendering the model
+	GraphicsEngine::get()->getRenderSystem()->setRasterizerState(false);
+	drawMesh(m_mesh, m_vertex_shader, m_pixel_shader, m_constant_buffer, m_texture1);
+
+	//rendering the skybox mesh which is a sphere
+	GraphicsEngine::get()->getRenderSystem()->setRasterizerState(true);
+	drawMesh(m_skybox_mesh, m_vertex_shader, m_skybox_shader, m_skybox_constant_buffer, m_texture_skybox);
+
+	m_swap_chain->present(false);
+
+	m_old_delta = m_new_delta;
+	m_new_delta = ::GetTickCount();
+	m_delta_time = (m_old_delta) ? ((m_new_delta - m_old_delta) / 1000.0f) : 0;
+}
+
 void AppWindow::drawMesh(const MeshPtr& mesh, const VertexShaderPtr& vertex_shader, const PixelShaderPtr& pixel_shader, const ConstantBufferPtr& constant_buffer, const TexturePtr& texture)
 {
 	//set constant buffer
@@ -127,6 +155,8 @@ void AppWindow::onCreate()
 	Window::onCreate();
 
 	InputSystem::get()->addListener(this);
+
+	m_resize_state = true;
 	InputSystem::get()->showCursor(false);
 
 	// get texture from file
@@ -176,35 +206,13 @@ void AppWindow::onUpdate()
 
 	InputSystem::get()->update();
 
-	/* clearing the render target */
-	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->clearRenderTargetColor(this->m_swap_chain, .25f, .25f, .25f, 1);  //0.125f, 0.025f, 0.125f
-
-	/* set viewport of render target (which to draw) */
-	RECT rc = this->getClientWindowRect();
-	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setViewportSize(rc.right - rc.left, rc.bottom - rc.top);
-
-	/* constant buffer updates */
-	// flag update
-	update();
-
-	//rendering the model
-	GraphicsEngine::get()->getRenderSystem()->setRasterizerState(false);
-	drawMesh(m_mesh, m_vertex_shader, m_pixel_shader, m_constant_buffer, m_texture1);
-
-	//rendering the skybox mesh which is a sphere
-	GraphicsEngine::get()->getRenderSystem()->setRasterizerState(true);
-	drawMesh(m_skybox_mesh, m_vertex_shader, m_skybox_shader, m_skybox_constant_buffer, m_texture_skybox);
-
-	m_swap_chain->present(false);
-
-	m_old_delta = m_new_delta;
-	m_new_delta = ::GetTickCount();
-	m_delta_time = (m_old_delta) ? ((m_new_delta - m_old_delta) / 1000.0f) : 0;
+	this->render();
 }
 
 void AppWindow::onDestroy()
 {
 	Window::onDestroy();
+	m_swap_chain->setFullscreen(false, 1, 1);
 }
 
 void AppWindow::onFocus()
@@ -217,13 +225,15 @@ void AppWindow::onKillFocus()
 	InputSystem::get()->removeListener(this);
 }
 
+void AppWindow::onSize()
+{
+	RECT rc = this->getClientWindowRect();
+	m_swap_chain->resize(rc.right, rc.bottom);
+	this->render();
+}
+
 void AppWindow::onKeyDown(int key)
 {
-	//if (key == 'W') m_rotation_x += 3.1415f * m_delta_time;
-	//else if (key == 'S') m_rotation_x -= 3.1415f * m_delta_time;
-	//else if (key == 'D') m_rotation_y -= 3.1415f * m_delta_time;
-	//else if (key == 'A') m_rotation_y += 3.1415f * m_delta_time;
-
 	if (key == 'W')
 	{
 		m_forward = 1.0f;
@@ -240,10 +250,18 @@ void AppWindow::onKeyDown(int key)
 	{
 		m_horizontal_move_coefficient = -1.0f;
 	}
+	else if (key == VK_LSHIFT)
+	{
+		m_forward *= 4.0f;
+		m_horizontal_move_coefficient *= 4.0f;
+	}
 	else if (key == VK_ESCAPE)
 	{
-		//m_kumbara += 1;
 		m_is_running = false;
+	}
+	else if (key == 'P')
+	{
+		return;
 	}
 }
 
@@ -251,10 +269,25 @@ void AppWindow::onKeyUp(int key)
 {
 	m_forward = .0f;
 	m_horizontal_move_coefficient = .0f;
+
+	if (key == 'P')
+	{
+		m_resize_state = (m_resize_state) ? false : true;
+		InputSystem::get()->showCursor(!m_resize_state);
+	}
+	else if (key == VK_F11)
+	{
+		m_fullscreen_flag = (m_fullscreen_flag) ? false : true;
+		
+		RECT screen_size = this->getScreenSize();
+
+		m_swap_chain->setFullscreen(m_fullscreen_flag, screen_size.right, screen_size.bottom);
+	}
 }
 
 void AppWindow::onMouseMove(const Point& mouse_position)
 {
+	if (!m_resize_state) return;
 	int width = this->getClientWindowRect().right - this->getClientWindowRect().left;
 	int height = this->getClientWindowRect().bottom - this->getClientWindowRect().top;
 
