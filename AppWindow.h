@@ -54,15 +54,12 @@ private:
 	ConstantBufferPtr m_skybox_constant_buffer;
 
 	//textures
-	TexturePtr m_world_morning_tex;
-	TexturePtr m_world_night_tex;
-	TexturePtr m_world_clouds_tex;
-	TexturePtr m_world_specular_tex;
-	TexturePtr m_texture_skybox;
+	TexturePtr m_brick_texture;
+	TexturePtr m_texture_skybox;  //skybox
 	
 	//meshes
 	MeshPtr m_mesh;
-	MeshPtr m_skybox_mesh;
+	MeshPtr m_skybox_mesh;  //skybox
 
 	//elapsed time calculation
 	long m_old_delta;
@@ -80,6 +77,7 @@ private:
 
 	//light
 	float m_light_rotation_y = .0f;
+	float m_light_radius = 4.0f;
 
 	//mouse button flags
 	bool is_pressed_left = false;

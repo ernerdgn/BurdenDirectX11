@@ -22,7 +22,11 @@ struct constant
 	Matrix4x4 m_projection;
 	Vector4D m_light_direction;
 	Vector4D m_cam_position;
+	Vector4D m_light_position = Vector4D(0,1,0,0);
+	float m_light_radius = 4.0f;
 	float m_time = .0f;
+
+
 };
 
 AppWindow::AppWindow()
@@ -77,12 +81,17 @@ void AppWindow::updateModel()
 	m_light_rotation_matrix.setIdentityMatrix();
 	m_light_rotation_matrix.setRotationYMatrix(m_light_rotation_y);
 
-	m_light_rotation_y += .785f * m_delta_time;  // pi / 4 * delta_t  (can be reduced)
+	m_light_rotation_y += 1.57f * m_delta_time;  // pi / 4 * delta_t  (can be modified to change the speed of the animation)
 
 	model_constant.m_world.setIdentityMatrix();
 	model_constant.m_view = m_view_cam;
 	model_constant.m_projection = m_projection_cam;
 	model_constant.m_cam_position = m_world_cam.getTranslation();
+
+	float distance_from_origin = 1.0f;
+	model_constant.m_light_position = Vector4D(cos(m_light_rotation_y) * distance_from_origin, 1.0f, sin(m_light_rotation_y) * distance_from_origin, 1.0f);
+	model_constant.m_light_radius = m_light_radius;
+
 	model_constant.m_light_direction = m_light_rotation_matrix.getZDirection();
 	model_constant.m_time = m_time;
 
@@ -118,13 +127,10 @@ void AppWindow::render()
 	//rendering the model
 	GraphicsEngine::get()->getRenderSystem()->setRasterizerState(false);
 
-	TexturePtr texture_list[4];
-	texture_list[0] = m_world_morning_tex;
-	texture_list[1] = m_world_specular_tex;
-	texture_list[2] = m_world_clouds_tex;
-	texture_list[3] = m_world_night_tex;
+	TexturePtr texture_list[1];
+	texture_list[0] = m_brick_texture;
 
-	drawMesh(m_mesh, m_vertex_shader, m_pixel_shader, m_constant_buffer, texture_list, 4);
+	drawMesh(m_mesh, m_vertex_shader, m_pixel_shader, m_constant_buffer, texture_list, 1);
 
 	//rendering the skybox mesh which is a sphere
 	GraphicsEngine::get()->getRenderSystem()->setRasterizerState(true);
@@ -174,15 +180,13 @@ void AppWindow::onCreate()
 	InputSystem::get()->showCursor(false);
 
 	// get texture from file
-	m_world_morning_tex = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\world_morning.jpg");
-	m_world_night_tex = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\world_night.jpg");
-	m_world_clouds_tex = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\world_clouds.jpg");
-	m_world_specular_tex = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\world_specular.jpg");
-	m_texture_skybox = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\stars.jpg");
+	m_brick_texture = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\brick.png");
+
+	m_texture_skybox = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\stars.jpg");  //skybox
 
 	// get 3d model from file
-	m_mesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"C:\\Users\\emrer\\OneDrive\\Meshes\\sphere_hq.obj");
-	m_skybox_mesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"C:\\Users\\emrer\\OneDrive\\Meshes\\sphere.obj");
+	m_mesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"C:\\Users\\emrer\\OneDrive\\Meshes\\scene.obj");
+	m_skybox_mesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"C:\\Users\\emrer\\OneDrive\\Meshes\\sphere.obj");  //skybox
 
 	RECT rc = this->getClientWindowRect();
 	m_swap_chain = GraphicsEngine::get()->getRenderSystem()->createSwapChain(this->m_hwnd, rc.right - rc.left, rc.bottom - rc.top);
@@ -194,12 +198,12 @@ void AppWindow::onCreate()
 	size_t size_shader = 0;
 
 	/* VERTEX SHADER */
-	GraphicsEngine::get()->getRenderSystem()->compileVertexShader(L"VertexShader.hlsl", "vsmain", &shader_byte_code, &size_shader);
+	GraphicsEngine::get()->getRenderSystem()->compileVertexShader(L"PointLightVertexShader.hlsl", "vsmain", &shader_byte_code, &size_shader);
 	m_vertex_shader = GraphicsEngine::get()->getRenderSystem()->createVertexShader(shader_byte_code, size_shader);
 	GraphicsEngine::get()->getRenderSystem()->releaseCompiledShader();
 
 	/* PIXEL SHADER */
-	GraphicsEngine::get()->getRenderSystem()->compilePixelShader(L"PixelShader.hlsl", "psmain", &shader_byte_code, &size_shader);
+	GraphicsEngine::get()->getRenderSystem()->compilePixelShader(L"PointLightPixelShader.hlsl", "psmain", &shader_byte_code, &size_shader);
 	m_pixel_shader = GraphicsEngine::get()->getRenderSystem()->createPixelShader(shader_byte_code, size_shader);
 	GraphicsEngine::get()->getRenderSystem()->releaseCompiledShader();
 
@@ -276,9 +280,13 @@ void AppWindow::onKeyDown(int key)
 	{
 		m_is_running = false;
 	}
-	else if (key == 'P')
+	else if (key == VK_UP)
 	{
-		return;
+		m_light_radius += 4.0f * m_delta_time;
+	}
+	else if (key == VK_DOWN)
+	{
+		m_light_radius -= 4.0f * m_delta_time;
 	}
 }
 
