@@ -25,7 +25,7 @@ float4 psmain(PIXEL_SHADER_INPUT input) : SV_TARGET
 {
     float alpha = 1.0f;
     
-    float4 texture_color = Texture.Sample(TextureSampler, (1.0f - input.texcoord) * 2.0f);
+    float4 texture_color = Texture.Sample(TextureSampler, (1.0f - input.texcoord));
     
     /* ambient */
     float ka = 1.5f;

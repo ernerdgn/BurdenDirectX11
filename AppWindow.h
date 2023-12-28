@@ -18,13 +18,14 @@ public:
 	void update();
 	~AppWindow();
 
-	void updateModel();
+	void updateModel(Vector3D position, const MaterialPtr& material);
 	void updateCamera();
 	void updateSkybox();
+	void updateLight();
 
 	void render();
 
-	void drawMesh(const MeshPtr& mesh, const VertexShaderPtr& vertex_shader, const PixelShaderPtr& pixel_shader, const ConstantBufferPtr& constant_buffer, const TexturePtr* texture_list, unsigned int texture_count);
+	void drawMesh(const MeshPtr& mesh, const MaterialPtr material);
 
 	//inheritence from window
 	virtual void onCreate() override;
@@ -55,11 +56,17 @@ private:
 
 	//textures
 	TexturePtr m_brick_texture;
+	TexturePtr m_world_texture;
 	TexturePtr m_texture_skybox;  //skybox
 	
 	//meshes
 	MeshPtr m_mesh;
 	MeshPtr m_skybox_mesh;  //skybox
+
+	//materials
+	MaterialPtr m_brick_material;
+	MaterialPtr m_world_material;
+	MaterialPtr m_skybox_material;  //skybox
 
 	//elapsed time calculation
 	long m_old_delta;
@@ -78,6 +85,7 @@ private:
 	//light
 	float m_light_rotation_y = .0f;
 	float m_light_radius = 4.0f;
+	Vector4D m_light_position;
 
 	//mouse button flags
 	bool is_pressed_left = false;

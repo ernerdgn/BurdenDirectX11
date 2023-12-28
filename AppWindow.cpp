@@ -36,7 +36,7 @@ AppWindow::AppWindow()
 void AppWindow::update()
 {
 	updateCamera();
-	updateModel();
+	updateLight();
 	updateSkybox();
 }
 
@@ -73,7 +73,7 @@ void AppWindow::updateCamera()
 	m_projection_cam.setPerspectiveFovLH(1.57f, ((float)width / (float)height), .1f, 100.0f);
 }
 
-void AppWindow::updateModel()
+void AppWindow::updateModel(Vector3D position, const MaterialPtr& material)
 {
 	constant model_constant;
 	Matrix4x4 m_light_rotation_matrix;
@@ -81,21 +81,19 @@ void AppWindow::updateModel()
 	m_light_rotation_matrix.setIdentityMatrix();
 	m_light_rotation_matrix.setRotationYMatrix(m_light_rotation_y);
 
-	m_light_rotation_y += 1.57f * m_delta_time;  // pi / 4 * delta_t  (can be modified to change the speed of the animation)
-
 	model_constant.m_world.setIdentityMatrix();
+	model_constant.m_world.setTranslationMatrix(position);
 	model_constant.m_view = m_view_cam;
 	model_constant.m_projection = m_projection_cam;
 	model_constant.m_cam_position = m_world_cam.getTranslation();
 
-	float distance_from_origin = 1.0f;
-	model_constant.m_light_position = Vector4D(cos(m_light_rotation_y) * distance_from_origin, 1.0f, sin(m_light_rotation_y) * distance_from_origin, 1.0f);
+	model_constant.m_light_position = m_light_position;
 	model_constant.m_light_radius = m_light_radius;
 
 	model_constant.m_light_direction = m_light_rotation_matrix.getZDirection();
 	model_constant.m_time = m_time;
 
-	m_constant_buffer->update(GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext(), &model_constant);  //constant buffer updating
+	material->setData(&model_constant, sizeof(constant));
 }
 
 void AppWindow::updateSkybox()
@@ -108,7 +106,15 @@ void AppWindow::updateSkybox()
 	skybox_constant.m_view = m_view_cam;
 	skybox_constant.m_projection = m_projection_cam;
 
-	m_skybox_constant_buffer->update(GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext(), &skybox_constant);  //constant buffer updating
+	m_skybox_material->setData(&skybox_constant, sizeof(constant));
+}
+
+void AppWindow::updateLight()
+{
+	m_light_rotation_y += 1.57f * m_delta_time;  // pi / 4 * delta_t  (can be modified to change the speed of the animation)
+
+	float distance_from_origin = 3.0f;
+	m_light_position = Vector4D(cos(m_light_rotation_y) * distance_from_origin, 2.0f, sin(m_light_rotation_y) * distance_from_origin, 2.0f);
 }
 
 void AppWindow::render()
@@ -125,19 +131,15 @@ void AppWindow::render()
 	update();
 
 	//rendering the model
-	GraphicsEngine::get()->getRenderSystem()->setRasterizerState(false);
+	updateModel(Vector3D(0, 0, 0), m_brick_material);
+	drawMesh(m_skybox_mesh, m_brick_material);
 
-	TexturePtr texture_list[1];
-	texture_list[0] = m_brick_texture;
-
-	drawMesh(m_mesh, m_vertex_shader, m_pixel_shader, m_constant_buffer, texture_list, 1);
+	//rendering the model
+	updateModel(Vector3D(0, 0, 5), m_world_material);
+	drawMesh(m_skybox_mesh, m_world_material);
 
 	//rendering the skybox mesh which is a sphere
-	GraphicsEngine::get()->getRenderSystem()->setRasterizerState(true);
-	
-	texture_list[0] = m_texture_skybox;
-	
-	drawMesh(m_skybox_mesh, m_vertex_shader, m_skybox_shader, m_skybox_constant_buffer, texture_list, 1);
+	drawMesh(m_skybox_mesh, m_skybox_material);
 
 	m_swap_chain->present(false);
 
@@ -148,18 +150,10 @@ void AppWindow::render()
 	m_time += m_delta_time;
 }
 
-void AppWindow::drawMesh(const MeshPtr& mesh, const VertexShaderPtr& vertex_shader, const PixelShaderPtr& pixel_shader, const ConstantBufferPtr& constant_buffer, const TexturePtr* texture_list, unsigned int texture_count)
+void AppWindow::drawMesh(const MeshPtr& mesh, const MaterialPtr material)
 {
 	//set constant buffer
-	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setConstantBuffer(vertex_shader, constant_buffer);
-	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setConstantBuffer(pixel_shader, constant_buffer);
-
-	//implement the prepared shaders to graphic pipeline to be able to draw
-	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setVertexShader(vertex_shader);
-	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setPixelShader(pixel_shader);
-
-	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setTexture(pixel_shader, texture_list, texture_count);
-
+	GraphicsEngine::get()->setMaterial(material);
 	//set the vertices of the object to draw
 	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setVertexBuffer(mesh->getVertexBuffer());
 
@@ -181,7 +175,7 @@ void AppWindow::onCreate()
 
 	// get texture from file
 	m_brick_texture = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\brick.png");
-
+	m_world_texture = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\world_morning.jpg");
 	m_texture_skybox = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\stars.jpg");  //skybox
 
 	// get 3d model from file
@@ -194,29 +188,18 @@ void AppWindow::onCreate()
 	//cam
 	m_world_cam.setTranslationMatrix(Vector3D(0, 0, -1));
 
-	void* shader_byte_code = nullptr;
-	size_t size_shader = 0;
+	/* MATERIAL */
+	m_brick_material = GraphicsEngine::get()->createMaterial(L"PointLightVertexShader.hlsl", L"PointLightPixelShader.hlsl");
+	m_brick_material->addTexture(m_brick_texture);
+	m_brick_material->setCullMode(CULL_MODE_BACK);
 
-	/* VERTEX SHADER */
-	GraphicsEngine::get()->getRenderSystem()->compileVertexShader(L"PointLightVertexShader.hlsl", "vsmain", &shader_byte_code, &size_shader);
-	m_vertex_shader = GraphicsEngine::get()->getRenderSystem()->createVertexShader(shader_byte_code, size_shader);
-	GraphicsEngine::get()->getRenderSystem()->releaseCompiledShader();
-
-	/* PIXEL SHADER */
-	GraphicsEngine::get()->getRenderSystem()->compilePixelShader(L"PointLightPixelShader.hlsl", "psmain", &shader_byte_code, &size_shader);
-	m_pixel_shader = GraphicsEngine::get()->getRenderSystem()->createPixelShader(shader_byte_code, size_shader);
-	GraphicsEngine::get()->getRenderSystem()->releaseCompiledShader();
-
-	/* SKYBOX SHADER */
-	GraphicsEngine::get()->getRenderSystem()->compilePixelShader(L"SkyboxShader.hlsl", "psmain", &shader_byte_code, &size_shader);
-	m_skybox_shader = GraphicsEngine::get()->getRenderSystem()->createPixelShader(shader_byte_code, size_shader);  //is a pixelShaderPtr
-	GraphicsEngine::get()->getRenderSystem()->releaseCompiledShader();
-
-	/* CONSTANT BUFFER */
-	constant const_obj;
-
-	m_constant_buffer = GraphicsEngine::get()->getRenderSystem()->createConstantBuffer(&const_obj, sizeof(constant));  //constant buffer loading
-	m_skybox_constant_buffer = GraphicsEngine::get()->getRenderSystem()->createConstantBuffer(&const_obj, sizeof(constant));  //skybox const buff
+	m_world_material = GraphicsEngine::get()->createMaterial(m_brick_material);
+	m_world_material->addTexture(m_world_texture);
+	m_world_material->setCullMode(CULL_MODE_BACK);
+	
+	m_skybox_material = GraphicsEngine::get()->createMaterial(L"PointLightVertexShader.hlsl", L"SkyboxShader.hlsl");
+	m_skybox_material->addTexture(m_texture_skybox);
+	m_skybox_material->setCullMode(CULL_MODE_FRONT);
 
 	m_world_cam.setTranslationMatrix(Vector3D(0, 0, -3));
 }
