@@ -11,14 +11,27 @@ Texture::Texture(const wchar_t* full_path) : Resource(full_path)
 		res = DirectX::CreateTexture(GraphicsEngine::get()->getRenderSystem()->m_d3d_device,
 			img_data.GetImages(), img_data.GetImageCount(), img_data.GetMetadata(), &m_texture);
 
+		if (FAILED(res)) throw std::exception("ResourceManager Error (5): Texture");
+
 		D3D11_SHADER_RESOURCE_VIEW_DESC desc = {};
 		desc.Format = img_data.GetMetadata().format;
 		desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-		desc.Texture2D.MipLevels = img_data.GetMetadata().mipLevels;
+		desc.Texture2D.MipLevels = img_data.GetMetadata().mipLevels;  //uint
 		desc.Texture2D.MostDetailedMip = 0;
 
-		GraphicsEngine::get()->getRenderSystem()->m_d3d_device->CreateShaderResourceView(m_texture,
-			&desc, &m_shader_resource_view);
+		D3D11_SAMPLER_DESC sampler_desc = {};
+		sampler_desc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+		sampler_desc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+		sampler_desc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+		sampler_desc.Filter = D3D11_FILTER_ANISOTROPIC;
+		sampler_desc.MinLOD = 0;
+		sampler_desc.MaxLOD = img_data.GetMetadata().mipLevels;
+
+		res = GraphicsEngine::get()->getRenderSystem()->m_d3d_device->CreateSamplerState(&sampler_desc, &m_sampler_state);
+		if (FAILED(res)) throw std::exception("ResourceManager Error (5): Texture");
+
+		res = GraphicsEngine::get()->getRenderSystem()->m_d3d_device->CreateShaderResourceView(m_texture, &desc, &m_shader_resource_view);
+		if (FAILED(res)) throw std::exception("ResourceManager Error (5): Texture");
 	}
 	else { throw std::exception("ResourceManager Error (5): Texture"); }
 }

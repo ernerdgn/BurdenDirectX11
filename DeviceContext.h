@@ -12,8 +12,8 @@ public:
 	void setVertexBuffer(const VertexBufferPtr& vertex_buffer);
 	void setIndexBuffer(const IndexBufferPtr& index_buffer);
 
-	void setTexture(const VertexShaderPtr& vertex_shader, const TexturePtr& texture);
-	void setTexture(const PixelShaderPtr& pixel_shader, const TexturePtr& texture);
+	void setTexture(const VertexShaderPtr& vertex_shader, const TexturePtr* texture, unsigned int texture_count);
+	void setTexture(const PixelShaderPtr& pixel_shader, const TexturePtr* texture, unsigned int texture_count);
 
 	void setConstantBuffer(const VertexShaderPtr& vertex_shader, const ConstantBufferPtr& constant_buffer);
 	void setConstantBuffer(const PixelShaderPtr& pixel_shader, const ConstantBufferPtr& constant_buffer);

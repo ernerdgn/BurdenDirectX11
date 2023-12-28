@@ -22,6 +22,7 @@ struct constant
 	Matrix4x4 m_projection;
 	Vector4D m_light_direction;
 	Vector4D m_cam_position;
+	float m_time = .0f;
 };
 
 AppWindow::AppWindow()
@@ -76,13 +77,14 @@ void AppWindow::updateModel()
 	m_light_rotation_matrix.setIdentityMatrix();
 	m_light_rotation_matrix.setRotationYMatrix(m_light_rotation_y);
 
-	m_light_rotation_y += .785f * m_delta_time;  // pi / 4 * delta_t
+	m_light_rotation_y += .785f * m_delta_time;  // pi / 4 * delta_t  (can be reduced)
 
 	model_constant.m_world.setIdentityMatrix();
 	model_constant.m_view = m_view_cam;
 	model_constant.m_projection = m_projection_cam;
 	model_constant.m_cam_position = m_world_cam.getTranslation();
 	model_constant.m_light_direction = m_light_rotation_matrix.getZDirection();
+	model_constant.m_time = m_time;
 
 	m_constant_buffer->update(GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext(), &model_constant);  //constant buffer updating
 }
@@ -115,20 +117,32 @@ void AppWindow::render()
 
 	//rendering the model
 	GraphicsEngine::get()->getRenderSystem()->setRasterizerState(false);
-	drawMesh(m_mesh, m_vertex_shader, m_pixel_shader, m_constant_buffer, m_texture1);
+
+	TexturePtr texture_list[4];
+	texture_list[0] = m_world_morning_tex;
+	texture_list[1] = m_world_specular_tex;
+	texture_list[2] = m_world_clouds_tex;
+	texture_list[3] = m_world_night_tex;
+
+	drawMesh(m_mesh, m_vertex_shader, m_pixel_shader, m_constant_buffer, texture_list, 4);
 
 	//rendering the skybox mesh which is a sphere
 	GraphicsEngine::get()->getRenderSystem()->setRasterizerState(true);
-	drawMesh(m_skybox_mesh, m_vertex_shader, m_skybox_shader, m_skybox_constant_buffer, m_texture_skybox);
+	
+	texture_list[0] = m_texture_skybox;
+	
+	drawMesh(m_skybox_mesh, m_vertex_shader, m_skybox_shader, m_skybox_constant_buffer, texture_list, 1);
 
 	m_swap_chain->present(false);
 
 	m_old_delta = m_new_delta;
 	m_new_delta = ::GetTickCount();
 	m_delta_time = (m_old_delta) ? ((m_new_delta - m_old_delta) / 1000.0f) : 0;
+
+	m_time += m_delta_time;
 }
 
-void AppWindow::drawMesh(const MeshPtr& mesh, const VertexShaderPtr& vertex_shader, const PixelShaderPtr& pixel_shader, const ConstantBufferPtr& constant_buffer, const TexturePtr& texture)
+void AppWindow::drawMesh(const MeshPtr& mesh, const VertexShaderPtr& vertex_shader, const PixelShaderPtr& pixel_shader, const ConstantBufferPtr& constant_buffer, const TexturePtr* texture_list, unsigned int texture_count)
 {
 	//set constant buffer
 	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setConstantBuffer(vertex_shader, constant_buffer);
@@ -138,7 +152,7 @@ void AppWindow::drawMesh(const MeshPtr& mesh, const VertexShaderPtr& vertex_shad
 	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setVertexShader(vertex_shader);
 	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setPixelShader(pixel_shader);
 
-	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setTexture(pixel_shader, texture);
+	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setTexture(pixel_shader, texture_list, texture_count);
 
 	//set the vertices of the object to draw
 	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setVertexBuffer(mesh->getVertexBuffer());
@@ -160,11 +174,14 @@ void AppWindow::onCreate()
 	InputSystem::get()->showCursor(false);
 
 	// get texture from file
-	m_texture1 = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\whitewall.png");
-	m_texture_skybox = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\sky.jpg");
+	m_world_morning_tex = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\world_morning.jpg");
+	m_world_night_tex = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\world_night.jpg");
+	m_world_clouds_tex = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\world_clouds.jpg");
+	m_world_specular_tex = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\world_specular.jpg");
+	m_texture_skybox = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\stars.jpg");
 
 	// get 3d model from file
-	m_mesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"C:\\Users\\emrer\\OneDrive\\Meshes\\statue.obj");
+	m_mesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"C:\\Users\\emrer\\OneDrive\\Meshes\\sphere_hq.obj");
 	m_skybox_mesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"C:\\Users\\emrer\\OneDrive\\Meshes\\sphere.obj");
 
 	RECT rc = this->getClientWindowRect();
@@ -172,8 +189,6 @@ void AppWindow::onCreate()
 
 	//cam
 	m_world_cam.setTranslationMatrix(Vector3D(0, 0, -1));
-
-	//GraphicsEngine::get()->createShaders();
 
 	void* shader_byte_code = nullptr;
 	size_t size_shader = 0;
@@ -198,6 +213,8 @@ void AppWindow::onCreate()
 
 	m_constant_buffer = GraphicsEngine::get()->getRenderSystem()->createConstantBuffer(&const_obj, sizeof(constant));  //constant buffer loading
 	m_skybox_constant_buffer = GraphicsEngine::get()->getRenderSystem()->createConstantBuffer(&const_obj, sizeof(constant));  //skybox const buff
+
+	m_world_cam.setTranslationMatrix(Vector3D(0, 0, -3));
 }
 
 void AppWindow::onUpdate()

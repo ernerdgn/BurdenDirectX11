@@ -24,7 +24,7 @@ public:
 
 	void render();
 
-	void drawMesh(const MeshPtr& mesh, const VertexShaderPtr& vertex_shader, const PixelShaderPtr& pixel_shader, const ConstantBufferPtr& constant_buffer, const TexturePtr& texture);
+	void drawMesh(const MeshPtr& mesh, const VertexShaderPtr& vertex_shader, const PixelShaderPtr& pixel_shader, const ConstantBufferPtr& constant_buffer, const TexturePtr* texture_list, unsigned int texture_count);
 
 	//inheritence from window
 	virtual void onCreate() override;
@@ -54,7 +54,10 @@ private:
 	ConstantBufferPtr m_skybox_constant_buffer;
 
 	//textures
-	TexturePtr m_texture1;
+	TexturePtr m_world_morning_tex;
+	TexturePtr m_world_night_tex;
+	TexturePtr m_world_clouds_tex;
+	TexturePtr m_world_specular_tex;
 	TexturePtr m_texture_skybox;
 	
 	//meshes
@@ -65,6 +68,7 @@ private:
 	long m_old_delta;
 	long m_new_delta;
 	float m_delta_time;
+	float m_time = .0f;
 
 	//position and scale changes
 	float m_delta_pos;
