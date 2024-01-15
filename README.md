@@ -30,19 +30,19 @@ __(*done* / **todo**)__
 
 *13-mouse control*
 
-**14-camera control**
+*14-camera control*
 
-**15-texturing**
+*15-texturing*
 
-**16-rendering 3d models**
+*16-rendering 3d models*
 
-**17-lightning**
+*17-lightning*
 
-**18-skybox**
+*18-skybox*
 
-**19-point light**
+*19-point light*
 
-**20-materials**
+*20-materials*
 
 **21-scene system**
 
@@ -57,3 +57,5 @@ __(*done* / **todo**)__
 **26-rendering entities**
 
 **27-text and user interface**
+
+# **MAKE A GAME WITH BURDEN ENGINE**
