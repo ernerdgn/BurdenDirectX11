@@ -113,6 +113,8 @@ void AppWindow::updateLight()
 {
 	m_light_rotation_y += 1.57f * m_delta_time;  // pi / 4 * delta_t  (can be modified to change the speed of the animation)
 
+
+
 	float distance_from_origin = 3.0f;
 	m_light_position = Vector4D(cos(m_light_rotation_y) * distance_from_origin, 2.0f, sin(m_light_rotation_y) * distance_from_origin, 2.0f);
 }
@@ -130,11 +132,11 @@ void AppWindow::render()
 	// flag update
 	update();
 
-	//rendering the model
+	//rendering the brick model
 	updateModel(Vector3D(0, 0, 0), m_brick_material);
 	drawMesh(m_skybox_mesh, m_brick_material);
 
-	//rendering the model
+	//rendering the world model
 	updateModel(Vector3D(0, 0, 5), m_world_material);
 	drawMesh(m_skybox_mesh, m_world_material);
 
@@ -181,6 +183,7 @@ void AppWindow::onCreate()
 	// get 3d model from file
 	m_mesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"C:\\Users\\emrer\\OneDrive\\Meshes\\scene.obj");
 	m_skybox_mesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"C:\\Users\\emrer\\OneDrive\\Meshes\\sphere.obj");  //skybox
+
 
 	RECT rc = this->getClientWindowRect();
 	m_swap_chain = GraphicsEngine::get()->getRenderSystem()->createSwapChain(this->m_hwnd, rc.right - rc.left, rc.bottom - rc.top);
@@ -271,6 +274,14 @@ void AppWindow::onKeyDown(int key)
 	{
 		m_light_radius -= 4.0f * m_delta_time;
 	}
+	//else if (key == VK_CONTROL)
+	//{
+		//return;
+	//}
+	//else if (key == VK_SPACE)
+	//{
+		//retrun;
+	//}
 }
 
 void AppWindow::onKeyUp(int key)

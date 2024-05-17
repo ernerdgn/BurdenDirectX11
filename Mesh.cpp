@@ -2,7 +2,8 @@
 #include <iostream>
 
 #define TINYOBJLOADER_IMPLEMENTATION
-#include <tiny_obj_loader.h>
+//#include <tiny_obj_loader.h>
+#include "Libs/tinyobjloader/include/tiny_obj_loader.h"
 
 #include <locale>
 

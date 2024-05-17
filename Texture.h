@@ -1,6 +1,7 @@
 #pragma once
 #include "Resource.h"
-#include <DirectXTex.h> //directX texture lib
+//#include <DirectXTex.h> //directX texture lib
+#include "Libs/DirectXTex/include/DirectXTex.h"
 #include <exception>
 #include <d3d11.h>
 
