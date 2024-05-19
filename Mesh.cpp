@@ -28,8 +28,8 @@ Mesh::Mesh(const wchar_t* file_path) : Resource(file_path)
 	//std::string input_file = std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(file_path);
 
 	std::string mtl_dir = input_file.substr(0, input_file.find_last_of("\\/"));
-	std::cout << "OBJ DIRECTORY: " << input_file << std::endl;
-	std::cout << "MTL DIRECTORY: " << mtl_dir << std::endl;
+	//std::cout << "OBJ DIRECTORY: " << input_file << std::endl;
+	//std::cout << "MTL DIRECTORY: " << mtl_dir << std::endl;
 
 	bool check = tinyobj::LoadObj(&attributes, &shapes, &materials, &warn, &error, input_file.c_str(), mtl_dir.c_str());
 
