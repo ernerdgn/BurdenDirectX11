@@ -73,7 +73,7 @@ void AppWindow::updateCamera()
 	m_projection_cam.setPerspectiveFovLH(1.57f, ((float)width / (float)height), .1f, 100.0f);
 }
 
-void AppWindow::updateModel(Vector3D position, const MaterialPtr& material)
+void AppWindow::updateModel(Vector3D position, const std::vector<MaterialPtr>& list_materials)
 {
 	constant model_constant;
 	Matrix4x4 m_light_rotation_matrix;
@@ -92,8 +92,11 @@ void AppWindow::updateModel(Vector3D position, const MaterialPtr& material)
 
 	model_constant.m_light_direction = m_light_rotation_matrix.getZDirection();
 	model_constant.m_time = m_time;
-
-	material->setData(&model_constant, sizeof(constant));
+	
+	for (size_t material = 0; material < list_materials.size(); material++)
+	{
+		list_materials[material]->setData(&model_constant, sizeof(constant));
+	}
 }
 
 void AppWindow::updateSkybox()
@@ -116,7 +119,8 @@ void AppWindow::updateLight()
 
 
 	float distance_from_origin = 3.0f;
-	m_light_position = Vector4D(cos(m_light_rotation_y) * distance_from_origin, 2.0f, sin(m_light_rotation_y) * distance_from_origin, 2.0f);
+	//m_light_position = Vector4D(cos(m_light_rotation_y) * distance_from_origin, 2.0f, sin(m_light_rotation_y) * distance_from_origin, 2.0f);
+	m_light_position = Vector4D(180, 140, 70, 2.0f);
 }
 
 void AppWindow::render()
@@ -132,16 +136,40 @@ void AppWindow::render()
 	// flag update
 	update();
 
-	//rendering the brick model
-	updateModel(Vector3D(0, 0, 0), m_brick_material);
-	drawMesh(m_skybox_mesh, m_brick_material);
+	////rendering the brick model
+	//updateModel(Vector3D(0, 0, 0), m_brick_material);
+	//drawMesh(m_skybox_mesh, m_brick_material);
 
-	//rendering the world model
-	updateModel(Vector3D(0, 0, 5), m_world_material);
-	drawMesh(m_skybox_mesh, m_world_material);
+	////rendering the world model
+	//updateModel(Vector3D(0, 0, 5), m_world_material);
+	//drawMesh(m_skybox_mesh, m_world_material);
+
+	//house
+	m_materials.clear();
+	m_materials.push_back(m_barrel_material);
+	m_materials.push_back(m_wall_material);
+	m_materials.push_back(m_windows_material);
+	m_materials.push_back(m_wood_material);
+
+	for (int i = 0; i < 4; i++)
+	{
+		updateModel(Vector3D(i * 10, 0, 0), m_materials);
+		drawMesh(m_house_mesh, m_materials);
+	}
+
+
+	//terrain
+	m_materials.clear();
+	m_materials.push_back(m_terrain_material);
+	updateModel(Vector3D(0, 0, 0), m_materials);
+	drawMesh(m_terrain_mesh, m_materials);
+
+	//skybox
+	m_materials.clear();
+	m_materials.push_back(m_skybox_material);
 
 	//rendering the skybox mesh which is a sphere
-	drawMesh(m_skybox_mesh, m_skybox_material);
+	drawMesh(m_skybox_mesh, m_materials);
 
 	m_swap_chain->present(false);
 
@@ -152,18 +180,27 @@ void AppWindow::render()
 	m_time += m_delta_time;
 }
 
-void AppWindow::drawMesh(const MeshPtr& mesh, const MaterialPtr material)
+void AppWindow::drawMesh(const MeshPtr& mesh, const std::vector<MaterialPtr>& list_materials)
 {
-	//set constant buffer
-	GraphicsEngine::get()->setMaterial(material);
 	//set the vertices of the object to draw
 	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setVertexBuffer(mesh->getVertexBuffer());
 
 	//set the indices of the object
 	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setIndexBuffer(mesh->getIndexBuffer());
 
-	/* drawing */
-	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->drawIndexedTriangleList(mesh->getIndexBuffer()->getSizeIndexList(), 0, 0);
+	for (size_t material = 0; material < mesh->getNumMaterialSlots(); material++)
+	{
+		if (material >= list_materials.size()) break;
+
+		MaterialSlot mat_ = mesh->getMaterialSlot(material);
+
+		//set constant buffer
+		GraphicsEngine::get()->setMaterial(list_materials[material]);
+
+		/* drawing */
+		//GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->drawIndexedTriangleList(mesh->getIndexBuffer()->getSizeIndexList(), 0, 0);
+		GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->drawIndexedTriangleList(mat_.num_indices, 0, mat_.start_index);
+	}
 }
 
 void AppWindow::onCreate()
@@ -176,35 +213,71 @@ void AppWindow::onCreate()
 	InputSystem::get()->showCursor(false);
 
 	// get texture from file
-	m_brick_texture = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\brick.png");
-	m_world_texture = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\world_morning.jpg");
-	m_texture_skybox = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\stars.jpg");  //skybox
+	//m_brick_texture = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\brick.png");
+	//m_world_texture = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\world_morning.jpg");
+	m_texture_skybox = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\sky.jpg");  //skybox
+	m_terrain_texture = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\sand.jpg");  //terrain
+	m_barrel_texture = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\barrel.jpg");  //house2
+	m_windows_texture = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\house_windows.jpg");  //3
+	m_wall_texture = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\house_brick.jpg");  //4
+	m_wood_texture = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\house_wood.jpg");  //5
 
 	// get 3d model from file
-	m_mesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"C:\\Users\\emrer\\OneDrive\\Meshes\\scene.obj");
+	// m_mesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"C:\\Users\\emrer\\OneDrive\\Meshes\\scene.obj");
 	m_skybox_mesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"C:\\Users\\emrer\\OneDrive\\Meshes\\sphere.obj");  //skybox
+	m_terrain_mesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"C:\\Users\\emrer\\OneDrive\\Meshes\\terrain.obj");  //terrain
+	m_house_mesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"C:\\Users\\emrer\\OneDrive\\Meshes\\house.obj");  //house
 
 
 	RECT rc = this->getClientWindowRect();
 	m_swap_chain = GraphicsEngine::get()->getRenderSystem()->createSwapChain(this->m_hwnd, rc.right - rc.left, rc.bottom - rc.top);
 
 	//cam
-	m_world_cam.setTranslationMatrix(Vector3D(0, 0, -1));
+	m_world_cam.setTranslationMatrix(Vector3D(-5, 0, 1));
 
 	/* MATERIAL */
-	m_brick_material = GraphicsEngine::get()->createMaterial(L"PointLightVertexShader.hlsl", L"PointLightPixelShader.hlsl");
-	m_brick_material->addTexture(m_brick_texture);
-	m_brick_material->setCullMode(CULL_MODE_BACK);
+	//m_brick_material = GraphicsEngine::get()->createMaterial(L"PointLightVertexShader.hlsl", L"PointLightPixelShader.hlsl");
+	//m_brick_material->addTexture(m_brick_texture);
+	//m_brick_material->setCullMode(CULL_MODE_BACK);
 
-	m_world_material = GraphicsEngine::get()->createMaterial(m_brick_material);
-	m_world_material->addTexture(m_world_texture);
-	m_world_material->setCullMode(CULL_MODE_BACK);
+	//m_world_material = GraphicsEngine::get()->createMaterial(m_brick_material);
+	//m_world_material->addTexture(m_world_texture);
+	//m_world_material->setCullMode(CULL_MODE_BACK);
+
+	//terrain
+	m_terrain_material = GraphicsEngine::get()->createMaterial(L"PointLightVertexShader.hlsl", L"PointLightPixelShader.hlsl");
+	m_terrain_material->addTexture(m_terrain_texture);
+	m_terrain_material->setCullMode(CULL_MODE_BACK);
+
+	//HOUSE
+	//barrel
+	m_barrel_material = GraphicsEngine::get()->createMaterial(L"PointLightVertexShader.hlsl", L"PointLightPixelShader.hlsl");
+	m_barrel_material->addTexture(m_barrel_texture);
+	m_barrel_material->setCullMode(CULL_MODE_BACK);
+
+	//wall
+	m_wall_material = GraphicsEngine::get()->createMaterial(m_barrel_material);
+	m_wall_material->addTexture(m_wall_texture);
+	m_wall_material->setCullMode(CULL_MODE_BACK);
+
+	//windows
+	m_windows_material = GraphicsEngine::get()->createMaterial(m_barrel_material);
+	m_windows_material->addTexture(m_windows_texture);
+	m_windows_material->setCullMode(CULL_MODE_BACK);
+
+	//wood
+	m_wood_material = GraphicsEngine::get()->createMaterial(m_barrel_material);
+	m_wood_material->addTexture(m_wood_texture);
+	m_wood_material->setCullMode(CULL_MODE_BACK);
 	
+	//skybox
 	m_skybox_material = GraphicsEngine::get()->createMaterial(L"PointLightVertexShader.hlsl", L"SkyboxShader.hlsl");
 	m_skybox_material->addTexture(m_texture_skybox);
 	m_skybox_material->setCullMode(CULL_MODE_FRONT);
 
 	m_world_cam.setTranslationMatrix(Vector3D(0, 0, -3));
+
+	m_materials.reserve(32);
 }
 
 void AppWindow::onUpdate()

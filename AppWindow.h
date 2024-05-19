@@ -18,14 +18,14 @@ public:
 	void update();
 	~AppWindow();
 
-	void updateModel(Vector3D position, const MaterialPtr& material);
+	void updateModel(Vector3D position, const std::vector<MaterialPtr>& list_materials);
 	void updateCamera();
 	void updateSkybox();
 	void updateLight();
 
 	void render();
 
-	void drawMesh(const MeshPtr& mesh, const MaterialPtr material);
+	void drawMesh(const MeshPtr& mesh, const std::vector<MaterialPtr>& list_materials);
 
 	//inheritence from window
 	virtual void onCreate() override;
@@ -55,18 +55,33 @@ private:
 	ConstantBufferPtr m_skybox_constant_buffer;
 
 	//textures
-	TexturePtr m_brick_texture;
-	TexturePtr m_world_texture;
+	//TexturePtr m_brick_texture;
+	//TexturePtr m_world_texture;
+	TexturePtr m_barrel_texture;  //2
+	TexturePtr m_wall_texture;  //3
+	TexturePtr m_windows_texture;  //4
+	TexturePtr m_wood_texture;  //5
 	TexturePtr m_texture_skybox;  //skybox
+	TexturePtr m_terrain_texture;  //terrain
 	
 	//meshes
-	MeshPtr m_mesh;
+	//MeshPtr m_mesh;
+	MeshPtr m_house_mesh;  //house
 	MeshPtr m_skybox_mesh;  //skybox
+	MeshPtr m_terrain_mesh;  //terrain
 
 	//materials
-	MaterialPtr m_brick_material;
-	MaterialPtr m_world_material;
+	//MaterialPtr m_brick_material;
+	//MaterialPtr m_world_material;
+	MaterialPtr m_house_material;  //house1
+	MaterialPtr m_barrel_material;  //2
+	MaterialPtr m_wall_material;  //3
+	MaterialPtr m_windows_material;  //4
+	MaterialPtr m_wood_material;  //5
 	MaterialPtr m_skybox_material;  //skybox
+	MaterialPtr m_terrain_material;  //terrain
+
+	std::vector<MaterialPtr> m_materials;
 
 	//elapsed time calculation
 	long m_old_delta;
@@ -84,7 +99,7 @@ private:
 
 	//light
 	float m_light_rotation_y = .0f;
-	float m_light_radius = 4.0f;
+	float m_light_radius = 500.0f;
 	Vector4D m_light_position;
 
 	//mouse button flags

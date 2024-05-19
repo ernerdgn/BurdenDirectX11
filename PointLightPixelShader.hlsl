@@ -25,10 +25,11 @@ float4 psmain(PIXEL_SHADER_INPUT input) : SV_TARGET
 {
     float alpha = 1.0f;
     
-    float4 texture_color = Texture.Sample(TextureSampler, (1.0f - input.texcoord));
+    float4 texture_color = Texture.Sample(TextureSampler, float2(input.texcoord.x, 1.0f - input.texcoord.y));
     
     /* ambient */
-    float ka = 1.5f;
+    //float ka = 1.5f;
+    float ka = 3.0f;
     float3 ia = float3(.09f, .08f, .07f);
     ia *= (texture_color.rgb);
     
@@ -57,7 +58,7 @@ float4 psmain(PIXEL_SHADER_INPUT input) : SV_TARGET
     float3 diffuse_light = (kd * id * diffuse_light_amount) / attenuation;
     
     /* specular */
-    float ks = 1.0;
+    float ks = 0.0;  //can be changed to 0 to eliminate
     float3 is = float3(1.0f, 1.0f, 1.0f);
     
     float3 direction_to_cam = normalize(input.world_position.xyz - m_cam_position.xyz);
