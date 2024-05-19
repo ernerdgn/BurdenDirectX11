@@ -44,18 +44,20 @@ __(*done* / **todo**)__
 
 *20-materials*
 
-**21-scene system**
+*21-scene system*
 
-**22-camera movements**
+*22-camera movements*
 
-**23-post-processing effects**
+*23-smooth camera*
 
-**24-entity component system (ecs)**
+**24-post-processing effects** (DELAYED)
 
-**25-component creation**
+**25-entity component system (ecs)** (DELAYED)
 
-**26-rendering entities**
+**26-component creation** (DELAYED)
 
-**27-text and user interface**
+**27-rendering entities** (DELAYED)
+
+**28-text and user interface** (DELAYED)
 
 # **MAKE A GAME WITH BURDEN ENGINE**

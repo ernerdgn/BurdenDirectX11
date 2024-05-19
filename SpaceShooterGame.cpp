@@ -25,8 +25,6 @@ struct constant
 	Vector4D m_light_position = Vector4D(0, 1, 0, 0);
 	float m_light_radius = 4.0f;
 	float m_time = .0f;
-
-
 };
 
 SpaceShooterGame::SpaceShooterGame()
