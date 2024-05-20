@@ -10,6 +10,7 @@
 #include "IndexBuffer.h"
 #include "InputListener.h"
 #include "Matrix4x4.h"
+#include "MathUtils.h"
 
 class SpaceShooterGame : public Window, public InputListener
 {
@@ -95,11 +96,22 @@ private:
 	float m_forward = .0f;
 	float m_horizontal_move_coefficient = .0f;  //right is positive due to the LH coord sys
 	Vector3D m_camera_rotation;
+	Vector3D m_current_camera_rotation;
 	Vector3D m_camera_position;
-	Vector3D m_spaceship_position;
-	Vector3D m_spaceship_rotation;
 	float m_camera_distance = 15.0f;
-	float m_spaceship_speed = 150.0f;
+	float m_current_camera_distance;
+
+	//spaceship
+	Vector3D m_spaceship_position;
+	Vector3D m_current_spaceship_position;
+	Vector3D m_spaceship_rotation;
+	Vector3D m_current_spaceship_rotation;
+	float m_spaceship_speed = 250.0f;
+
+	//asteroids
+	Vector3D m_asteroids_position[200];
+	Vector3D m_asteroids_rotation[200];
+	Vector3D m_asteroids_scale[200];
 
 	//world-view-porjection matrices
 	Matrix4x4 m_world_cam;

@@ -28,7 +28,7 @@ float4 psmain(PIXEL_SHADER_INPUT input) : SV_TARGET
     float4 color = Color.Sample(ColorSampler, float2(input.texcoord.x, 1.0f - input.texcoord.y));
     
     /* ambient */
-    float ka = 1.5f;
+    float ka = 5.0f;  //1.5 for default maybe
     float3 ia = float3(.09f, .08f, .07f);
     ia *= (color.rgb);
     
