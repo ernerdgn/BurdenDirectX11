@@ -10,4 +10,4 @@ This project delves into the details of these pipeline stages, exploring how dat
 
 Additionally, the project examines optimization techniques and algorithms to enhance the efficiency of the graphical pipeline, improving rendering speed and overall graphics performance.
 
-Check [this pdf](https://smallpdf.com/file#s=01cc4613-8de5-44c2-aba4-3810de17f3ca) for document. **Document may be not up to date.**
+Check [this pdf](gameenginedoc.pdf) for document. **Document may be not up to date.**
