@@ -9,3 +9,5 @@ The core focus of this project revolves around graphical programming. The proces
 This project delves into the details of these pipeline stages, exploring how data is processed and manipulated at each step. The goal is to gain a deep understanding of how graphical data is transformed from its initial geometric representation into the final rendered image displayed on the screen.
 
 Additionally, the project examines optimization techniques and algorithms to enhance the efficiency of the graphical pipeline, improving rendering speed and overall graphics performance.
+
+Check [this pdf](https://smallpdf.com/file#s=01cc4613-8de5-44c2-aba4-3810de17f3ca) for document. **Document may be not up to date.**
